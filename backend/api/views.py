@@ -8,6 +8,6 @@ from rest_framework.decorators import api_view
 @api_view(["POST"])
 def api_home(request, *args, **kwargs):
     serializer = ProductSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         # data = serializer.save()
         return Response(serializer.data)
