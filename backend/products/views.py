@@ -1,10 +1,25 @@
-from rest_framework import generics
+from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
 from django.shortcuts import get_object_or_404
 
 from .serializers import ProductSerializer
+
+class ProductMixinView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('pk'):
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+
 
 class ProductDetailApiView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
@@ -13,6 +28,8 @@ class ProductDetailApiView(generics.RetrieveAPIView):
 class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    authentication_classes = [authentication.SessionAuthentication]
     #Set which fields to be used for creating the new model
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -26,6 +43,21 @@ class ProductListApiView(generics.ListAPIView):
     #Going to use ListCreateAPIView instead of ListAPIView.
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+class ProductUpdateApiView(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if not instance.content:
+            instance.content = instance.title
+            instance.save()
+
+class ProductDeleteApiView(generics.DestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
 
 @api_view(['GET', 'POST'])
 
