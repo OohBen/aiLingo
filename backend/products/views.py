@@ -2,8 +2,9 @@ from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
+from .permissions import IsStaffEditorPermission
 from django.shortcuts import get_object_or_404
-
+from api.authentication import TokenAuthentication
 from .serializers import ProductSerializer
 
 class ProductMixinView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
@@ -28,8 +29,8 @@ class ProductDetailApiView(generics.RetrieveAPIView):
 class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    authentication_classes = [authentication.SessionAuthentication, TokenAuthentication]
     #Set which fields to be used for creating the new model
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
