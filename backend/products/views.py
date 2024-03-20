@@ -2,12 +2,12 @@ from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
-from .permissions import IsStaffEditorPermission
 from django.shortcuts import get_object_or_404
 from api.authentication import TokenAuthentication
 from .serializers import ProductSerializer
+from api.mixins import StaffEditorPermissionMixIn
 
-class ProductMixinView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class ProductMixinView(StaffEditorPermissionMixIn, generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
@@ -22,15 +22,13 @@ class ProductMixinView(generics.GenericAPIView, mixins.ListModelMixin, mixins.Cr
     
 
 
-class ProductDetailApiView(generics.RetrieveAPIView):
+class ProductDetailApiView(StaffEditorPermissionMixIn, generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-class ProductListCreateApiView(generics.ListCreateAPIView):
+class ProductListCreateApiView(StaffEditorPermissionMixIn, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
-    authentication_classes = [authentication.SessionAuthentication, TokenAuthentication]
     #Set which fields to be used for creating the new model
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -40,12 +38,14 @@ class ProductListCreateApiView(generics.ListCreateAPIView):
             content=title
         serializer.save(content=content)
 
-class ProductListApiView(generics.ListAPIView):
+class ProductListApiView(StaffEditorPermissionMixIn, generics.ListAPIView):
     #Going to use ListCreateAPIView instead of ListAPIView.
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-class ProductUpdateApiView(generics.UpdateAPIView):
+class ProductUpdateApiView(StaffEditorPermissionMixIn,generics.UpdateAPIView):
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -55,7 +55,8 @@ class ProductUpdateApiView(generics.UpdateAPIView):
             instance.content = instance.title
             instance.save()
 
-class ProductDeleteApiView(generics.DestroyAPIView):
+class ProductDeleteApiView(StaffEditorPermissionMixIn,generics.DestroyAPIView):
+    
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
