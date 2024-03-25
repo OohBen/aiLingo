@@ -1,5 +1,11 @@
 from flask import Flask, jsonify
-
+"""
+GET /languages: Get a list of all languages
+GET /languages/<int:language_id>: Get details of a specific language
+GET /languages/<int:language_id>/lessons: Get a list of lessons for a specific language
+GET /languages/<int:language_id>/quizzes: Get a list of quizzes for a specific language
+GET /quizzes/<int:quiz_id>: Get details of a specific quiz, including its questions
+"""
 app = Flask(__name__)
 
 # Languages Models
