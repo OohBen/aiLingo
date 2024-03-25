@@ -1,5 +1,19 @@
 from flask import Flask, jsonify
+"""
+GET /languages: Get a list of all languages
+GET /languages/<int:language_id>: Get details of a specific language
+GET /languages/<int:language_id>/lessons: Get a list of lessons for a specific language
+GET /lessons/<int:lesson_id>: Get details of a specific lesson
+GET /languages/<int:language_id>/quizzes: Get a list of quizzes for a specific language
+GET /quizzes/<int:quiz_id>: Get details of a specific quiz, including its questions
 
+to run:
+make a venv (python -m venv .venv)
+activate the venv (source .venv/Scripts/activate for windows, source .venv/bin/activate for mac)
+pip install flask
+flask -app example.py
+
+"""
 app = Flask(__name__)
 
 # Languages Models
