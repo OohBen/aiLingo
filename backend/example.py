@@ -1,24 +1,23 @@
 from flask import Flask, jsonify
-"""
-GET /languages: Get a list of all languages
-GET /languages/<int:language_id>: Get details of a specific language
-GET /languages/<int:language_id>/lessons: Get a list of lessons for a specific language
-GET /languages/<int:language_id>/quizzes: Get a list of quizzes for a specific language
-GET /quizzes/<int:quiz_id>: Get details of a specific quiz, including its questions
-"""
+
 app = Flask(__name__)
 
 # Languages Models
 languages = [
     {
         "id": 1,
-        "name": "Python",
-        "code": "py"
+        "name": "English",
+        "code": "en"
     },
     {
         "id": 2,
-        "name": "JavaScript",
-        "code": "js"
+        "name": "Spanish",
+        "code": "es"
+    },
+    {
+        "id": 3,
+        "name": "French",
+        "code": "fr"
     }
 ]
 
@@ -26,16 +25,23 @@ lessons = [
     {
         "id": 1,
         "language": 1,
-        "title": "Introduction to Python",
-        "content": "This is the content for the Python intro lesson.",
-        "tags": ["beginner", "python"]
+        "title": "English Grammar Basics",
+        "content": "This is the content for the English Grammar Basics lesson.",
+        "tags": ["beginner", "english", "grammar"]
     },
     {
         "id": 2,
         "language": 2,
-        "title": "JavaScript Basics",
-        "content": "This is the content for the JavaScript basics lesson.",
-        "tags": ["beginner", "javascript"]
+        "title": "Spanish Vocabulary",
+        "content": "This is the content for the Spanish Vocabulary lesson.",
+        "tags": ["beginner", "spanish", "vocabulary"]
+    },
+    {
+        "id": 3,
+        "language": 3,
+        "title": "French Pronunciation",
+        "content": "This is the content for the French Pronunciation lesson.",
+        "tags": ["intermediate", "french", "pronunciation"]
     }
 ]
 
@@ -43,7 +49,7 @@ quizzes = [
     {
         "id": 1,
         "language": 1,
-        "title": "Python Quiz 1",
+        "title": "English Grammar Quiz",
         "questions": [1, 2],
         "duration": 30,
         "passing_score": 80
@@ -51,36 +57,56 @@ quizzes = [
     {
         "id": 2,
         "language": 2,
-        "title": "JavaScript Quiz 1",
+        "title": "Spanish Vocabulary Quiz",
         "questions": [3, 4],
         "duration": 45,
         "passing_score": 75
+    },
+    {
+        "id": 3,
+        "language": 3,
+        "title": "French Pronunciation Quiz",
+        "questions": [5, 6],
+        "duration": 20,
+        "passing_score": 70
     }
 ]
 
 questions = [
     {
         "id": 1,
-        "text": "What is the output of print(2 + 2)?",
-        "choices": ["2", "4", "6", "8"],
-        "answer": 2
+        "text": "What is the correct way to use the verb 'to be' in the present tense?",
+        "choices": ["I is", "I am", "I are", "I be"],
+        "answer": 1
     },
     {
         "id": 2,
-        "text": "What is the result of 5 * 3?",
-        "choices": ["8", "12", "15", "18"],
-        "answer": 3
-    },
-    {
-        "id": 3,
-        "text": "Which operator is used to assign a value to a variable?",
-        "choices": ["+", "-", "=", "*"],
+        "text": "What is the plural form of 'child'?",
+        "choices": ["childs", "childrens", "children", "childres"],
         "answer": 2
     },
     {
+        "id": 3,
+        "text": "What is the Spanish word for 'book'?",
+        "choices": ["libro", "papel", "cuaderno", "lapiz"],
+        "answer": 0
+    },
+    {
         "id": 4,
-        "text": "What is the correct way to write a comment in JavaScript?",
-        "choices": ["/* Comment */", "// Comment", "# Comment", "{ Comment }"],
+        "text": "How do you say 'Hello' in Spanish?",
+        "choices": ["Hola", "Adios", "Gracias", "Buenos dias"],
+        "answer": 0
+    },
+    {
+        "id": 5,
+        "text": "How is the word 'bonjour' pronounced in French?",
+        "choices": ["bon-jour", "bon-zhoor", "bon-joor", "bon-jure"],
+        "answer": 1
+    },
+    {
+        "id": 6,
+        "text": "What is the correct pronunciation of the French word 'merci'?",
+        "choices": ["mer-see", "mer-see", "mer-chi", "mer-key"],
         "answer": 1
     }
 ]
@@ -105,6 +131,14 @@ def get_language_lessons(language_id):
         return jsonify(lessons_for_language)
     else:
         return jsonify({"error": "No lessons found for this language"}), 404
+
+@app.route('/lessons/<int:lesson_id>', methods=['GET'])
+def get_lesson(lesson_id):
+    lesson = next((l for l in lessons if l['id'] == lesson_id), None)
+    if lesson:
+        return jsonify(lesson)
+    else:
+        return jsonify({"error": "Lesson not found"}), 404
 
 @app.route('/languages/<int:language_id>/quizzes', methods=['GET'])
 def get_language_quizzes(language_id):
