@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const Navbar = () => {
   return (
-    <nav className="bg-blue-500 text-white p-4">
+    <nav className="bg-black text-white p-6">
       <div className="container mx-auto flex justify-between items-center">
         {/* The Link component wraps the text without an <a> tag */}
         <Link href="/" className="text-lg font-bold">
