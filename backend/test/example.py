@@ -15,7 +15,9 @@ flask -app example.py
 
 """
 app = Flask(__name__)
+from flask_cors import CORS
 
+CORS(app)
 # Languages Models
 languages = [
     {
