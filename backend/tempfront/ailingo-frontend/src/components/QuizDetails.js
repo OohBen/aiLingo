@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -6,8 +7,8 @@ function QuizDetails() {
   const { id } = useParams();
   const [quiz, setQuiz] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [score, setScore] = useState(0);
-
+  const [userAnswers, setUserAnswers] = useState({});
+  const navigate = useNavigate();
   useEffect(() => {
     fetchQuizDetails();
     fetchQuestions();
@@ -32,24 +33,36 @@ function QuizDetails() {
   };
 
   const handleAnswerSelect = (questionId, selectedAnswer) => {
-    setQuestions((prevQuestions) =>
-      prevQuestions.map((question) =>
-        question.id === questionId
-          ? { ...question, selectedAnswer, showExplanation: true }
-          : question
-      )
-    );
+    setUserAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: selectedAnswer,
+    }));
+  };
+
+  const calculateScore = () => {
+    let totalScore = 0;
+    let maxScore = 0;
+
+    questions.forEach((question) => {
+      maxScore += question.worth;
+      if (userAnswers[question.id] === question.answer) {
+        totalScore += question.worth;
+      }
+    });
+
+    return (totalScore / maxScore) * 100;
   };
 
   const handleQuizSubmit = async () => {
     const attemptData = {
       quiz: quiz.id,
-      score: score,
+      user_answers: userAnswers,
     };
 
     try {
       await axiosInstance.post('http://localhost:8000/api/quizzes/attempt/', attemptData);
-      // Redirect to a quiz results page or display a success message
+      // Redirect to the analytics dashboard or display a success message
+      navigate('/analytics');
     } catch (error) {
       console.error(error);
     }
@@ -61,44 +74,7 @@ function QuizDetails() {
 
   return (
     <div className="quiz-details">
-      <h2>{quiz.title}</h2>
-      <h3>Questions:</h3>
-      <ul>
-        {questions.map((question) => (
-          <li key={question.id} className="question-item">
-            <div className="question-text">{question.text}</div>
-            <ul className="question-choices">
-              {question.choices.map((choice, index) => (
-                <li
-                  key={index}
-                  className={`choice ${
-                    question.selectedAnswer === index + 1 ? 'selected' : ''
-                  } ${
-                    question.showExplanation && question.selectedAnswer === index + 1
-                      ? question.answer === index + 1
-                        ? 'correct'
-                        : 'incorrect'
-                      : ''
-                  }`}
-                  onClick={() => handleAnswerSelect(question.id, index + 1)}
-                >
-                  {choice}
-                  {question.showExplanation && question.selectedAnswer === index + 1 && (
-                    <span className="choice-icon">
-                      {question.answer === index + 1 ? '✔' : '✘'}
-                    </span>
-                  )}
-                  {question.showExplanation && question.selectedAnswer === index + 1 && (
-                    <div className="choice-explanation">
-                      <strong>Explanation:</strong> {question.explanations[index]}
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
+      {/* ... existing code ... */}
       <button onClick={handleQuizSubmit}>Submit Quiz</button>
     </div>
   );

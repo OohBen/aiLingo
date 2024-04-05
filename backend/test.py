@@ -24,10 +24,10 @@ def traverse_folder(folder_path, combined_content):
         item_path = os.path.join(folder_path, item)
         
         # If the item is a folder, recursively traverse it
-        if os.path.isdir(item_path) and not item.startswith('migrations'):
+        if os.path.isdir(item_path) and not item.startswith("node_modules") and not item.startswith('migrations') and not item.startswith('.'):
             combined_content = traverse_folder(item_path, combined_content)
         # If the item is a file, read its contents and add them to the combined content
-        elif os.path.isfile(item_path) and item_path != output_file_path:
+        elif os.path.isfile(item_path) and item_path.find("package-lock.json")==-1 and item_path.find("test.py") == -1:
             file_content = read_file(item_path)
             if file_content:
                 combined_content += f"### {os.path.join(folder_path, item)} ###\n{file_content}\n\n"
@@ -35,11 +35,11 @@ def traverse_folder(folder_path, combined_content):
     return combined_content
 
 # Get the folder path from the user
-folder_path = input("Enter the folder path: ")
+folder_path = "."
 
 # Initialize an empty string to store the combined contents
 combined_content = ""
-output_file_path = input("Enter the output file path (e.g., combined_files.txt): ")
+output_file_path = "test.txt"
 
 # Traverse the folder and subfolders
 combined_content = traverse_folder(folder_path, combined_content)

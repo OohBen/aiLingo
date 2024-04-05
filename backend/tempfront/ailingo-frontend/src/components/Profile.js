@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import axiosInstance from '../utils/axiosInstance';
+import { logoutUser } from '../utils/auth';
 
 function Profile() {
   const navigate = useNavigate();
@@ -9,7 +10,6 @@ function Profile() {
 
   useEffect(() => {
     fetchUserData();
-    console.log("hello");
   }, []);
 
   const fetchUserData = async () => {
@@ -21,14 +21,9 @@ function Profile() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      navigate('/login');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/login');
   };
 
   if (!user) {
@@ -37,24 +32,22 @@ function Profile() {
 
   return (
     <Container>
-      <h1>Profile</h1>
-      <Row>
-        <Col>
+      <Row className="justify-content-center mt-5">
+        <Col md={6}>
           <Card>
             <Card.Body>
-              <Card.Title>User Information</Card.Title>
-              <p>Name: {user.name}</p>
-              <p>Email: {user.email}</p>
-              {/* Display other user information */}
+              <Card.Title>Profile</Card.Title>
+              <Card.Text>
+                <strong>Name:</strong> {user.name}
+              </Card.Text>
+              <Card.Text>
+                <strong>Email:</strong> {user.email}
+              </Card.Text>
+              <Button variant="primary" onClick={handleLogout}>
+                Logout
+              </Button>
             </Card.Body>
           </Card>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Button variant="danger" onClick={handleLogout}>
-            Logout
-          </Button>
         </Col>
       </Row>
     </Container>
