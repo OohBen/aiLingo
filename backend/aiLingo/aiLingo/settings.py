@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'languages',
     'quizzes',
     'analytics',
+    'chat',
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import { Form, Button, Alert } from 'react-bootstrap';
 
 function CreateQuiz() {
   const [title, setTitle] = useState('');
@@ -49,40 +50,40 @@ function CreateQuiz() {
 
   return (
     <div className="container">
-      <div className="create-quiz-form">
-        <h2>Create Quiz</h2>
-        {success && <p className="success">Quiz created successfully!</p>}
-        {error && <p className="error">{error}</p>}
-        {loading ? (
-          <div className="loading">
-            <p>Creating quiz...</p>
-            <div className="loading-spinner"></div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Quiz Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              required
-            >
-              <option value="">Select Language</option>
-              {languages.map((lang) => (
-                <option key={lang.id} value={lang.id}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
-            <button type="submit">Create Quiz</button>
-          </form>
-        )}
-      </div>
+      <h2>Create Quiz</h2>
+      {success && <Alert variant="success">Quiz created successfully!</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="title">
+          <Form.Label>Title</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter quiz title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </Form.Group>
+        <Form.Group controlId="language">
+          <Form.Label>Language</Form.Label>
+          <Form.Control
+            as="select"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            required
+          >
+            <option value="">Select Language</option>
+            {languages.map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
+          </Form.Control>
+        </Form.Group>
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? 'Creating...' : 'Create Quiz'}
+        </Button>
+      </Form>
     </div>
   );
 }

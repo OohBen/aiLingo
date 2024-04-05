@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import Navigation from './components/Navigation';
@@ -9,17 +9,24 @@ import Dashboard from './components/Dashboard';
 import Languages from './components/Languages';
 import Lessons from './components/Lessons';
 import Quizzes from './components/Quizzes';
-import QuizDetails from './components/QuizDetails';
+import Chat from './components/Chat';
 import GenerateQuestion from './components/GenerateQuestion';
 import CreateQuiz from './components/CreateQuiz';
 import Profile from './components/Profile';
 import QuizAttempt from './components/QuizAttempt';
+import ConversationPage from './components/ConversationPage';
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
   return (
     <Router>
-      <Navigation />
-      <Container>
+      <div className={darkMode ? 'dark-mode' : ''}>
+        <Navigation darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <Container>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -32,8 +39,11 @@ function App() {
           <Route path="/generate-question" element={<GenerateQuestion />} />
           <Route path="/create-quiz" element={<CreateQuiz />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/conversations/:id" element={<ConversationPage darkMode={darkMode} />} />
         </Routes>
       </Container>
+      </div>
     </Router>
   );
 }

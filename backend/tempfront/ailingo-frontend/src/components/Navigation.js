@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { isLoggedIn } from '../utils/auth';
 
-function Navigation() {
+function Navigation({ darkMode, toggleDarkMode }) {
   const loggedIn = isLoggedIn();
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar bg={darkMode ? 'dark' : 'light'} variant={darkMode ? 'dark' : 'light'} expand="lg" className={darkMode ? 'dark-mode' : ''}>
       <Container>
         <Navbar.Brand as={Link} to="/">
           aiLingo
@@ -37,16 +37,34 @@ function Navigation() {
             <Nav.Link as={Link} to="/quizzes">
               Quizzes
             </Nav.Link>
+            {loggedIn && ( 
+              <Nav.Link as={Link} to="/create-quiz">
+                Create Quiz
+              </Nav.Link>
+            )}
             {loggedIn && (
               <Nav.Link as={Link} to="/profile">
                 Profile
               </Nav.Link>
             )}
+              {loggedIn && (
+              <Nav.Link as={Link} to="/chat">
+                Chat
+              </Nav.Link>
+            )}
+              {loggedIn && (
+              <Nav.Link as={Link} to="/analytics">
+                Analytics
+              </Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
+      <Button variant={darkMode ? 'light' : 'dark'} onClick={toggleDarkMode}>
+        {darkMode ? 'Light Mode' : 'Dark Mode'}
+      </Button>
     </Navbar>
-  );
+);
 }
 
 export default Navigation;

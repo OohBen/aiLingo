@@ -1,0 +1,89 @@
+/* global.css */
+
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --light-color: #f8f9fa;
+    --dark-color: #121212;
+    --dark-secondary-color: #1f1f1f;
+  }
+  
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+  }
+  
+  .dark-mode {
+    background-color: var(--dark-color);
+    color: var(--light-color);
+  }
+  
+  .dark-mode .card {
+    background-color: var(--dark-secondary-color);
+    border-color: var(--dark-secondary-color);
+  }
+  
+  .dark-mode .list-group-item {
+    background-color: var(--dark-secondary-color);
+    color: var(--light-color);
+    border-color: var(--dark-color);
+  }
+  
+  .dark-mode .form-control {
+    background-color: var(--dark-secondary-color);
+    color: var(--light-color);
+    border-color: var(--dark-color);
+  }
+  
+  .dark-mode .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .dark-mode .btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+  }
+  
+  .dark-mode .navbar {
+    background-color: var(--dark-secondary-color);
+    border-color: var(--dark-color);
+  }
+  
+  .dark-mode .chat-messages {
+    background-color: var(--dark-secondary-color);
+  }
+  
+  .dark-mode .user-message {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+  }
+  
+  .dark-mode .bot-message {
+    background-color: var(--secondary-color);
+    color: var(--light-color);
+  }
+  .dark-mode {
+    background-color: var(--dark-color);
+    color: var(--light-color);
+  }
+  
+  .dark-mode .card {
+    background-color: var(--dark-secondary-color);
+    border-color: var(--dark-secondary-color);
+    color: var(--light-color);
+  }
+  
+  .dark-mode .list-group-item {
+    background-color: var(--dark-secondary-color);
+    color: var(--light-color);
+    border-color: var(--dark-color);
+  }
+  
+  .dark-mode .form-control {
+    background-color: var(--dark-secondary-color);
+    color: var(--light-color);
+    border-color: var(--dark-color);
+  }
+  

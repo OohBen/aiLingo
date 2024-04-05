@@ -99,6 +99,95 @@ class QuizRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Quiz.objects.filter(user=self.request.user)
 
+class GenerateQuestionView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuestionSerializer
+
+    def post(self, request, quiz_id):
+        quiz_id = self.kwargs['quiz_id']
+        quiz = Quiz.objects.get(id=quiz_id)
+        prompt = request.data['prompt']
+        language = quiz.language
+        # Configure the Gemini AI API
+        genai.configure(api_key=settings.GOOGLE_GENERATIVE_AI_API_KEY)
+
+        generation_config = {
+            "temperature": 0.9,
+            "top_p": 1,
+            "top_k": 1,
+            "max_output_tokens": 2048,
+        }
+
+        safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+        ]
+
+        model = genai.GenerativeModel(model_name="gemini-1.0-pro",
+                                      generation_config=generation_config,
+                                      safety_settings=safety_settings)
+
+        prompt_parts = [
+            f"You are a teacher of the {language} language. Reply in {language} and make sure to provide examples of use cases when teaching. Be supportive and helpful. Unless specified, generate 5 example questions. When giving the answer key to questions, use the following format: 888333 ANSWERKEY 888333 followed by the answers on the next line.",
+            f"input: {prompt}",
+            "output: ",
+        ]
+
+        response = model.generate_content(prompt_parts)
+        generated_text = response.text
+
+        # Extract the generated question and answer key
+        question_text = generated_text.split('888333 ANSWERKEY 888333')[0].strip()
+        answer_key = generated_text.split('888333 ANSWERKEY 888333')[1].strip()
+
+        question_data = {
+            'quiz': quiz.id,
+            'text': question_text,
+            'answer': answer_key
+        }
+
+        if 'choices' in generated_text:
+            choices = generated_text.split('choices:')[1].strip().split('\n')
+            question_data['choices'] = choices
+
+        serializer = QuestionSerializer(data=question_data)
+        serializer.is_valid(raise_exception=True)
+        question = serializer.save()
+
+        return Response({'question': serializer.data}, status=status.HTTP_201_CREATED)
+
+class QuizListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+    def get_queryset(self):
+        return Quiz.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class QuizRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+
+    def get_queryset(self):
+        return Quiz.objects.filter(user=self.request.user)
+
 class CreateQuizView(generics.CreateAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]

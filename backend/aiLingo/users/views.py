@@ -53,7 +53,10 @@ class ProfileView(APIView):
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        data = serializer.data
+        data['is_superuser'] = user.is_superuser
+        return Response(data)
+
 
 class RefreshTokenView(APIView):
     permission_classes = []
