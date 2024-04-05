@@ -1,12 +1,12 @@
-// Chat.js
-
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import axiosInstance from '../utils/axiosInstance';
 import { Link } from 'react-router-dom';
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
-function Chat( ) {
-    const [conversations, setConversations] = useState([]);
+function Chat() {
+  const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -82,7 +82,7 @@ function Chat( ) {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
-        content: newMessage,
+        content: `Please respond using only markdown:\n\n${newMessage}`,
       });
       setMessages([...messages, response.data]);
       setNewMessage('');
@@ -128,10 +128,16 @@ function Chat( ) {
     setDarkMode(!darkMode);
   };
 
+  const renderMarkdown = (content) => {
+    const processedContent = content.replace(/\\n/g, '\n');
+    return <Markdown remarkPlugins={[remarkGfm]}>{processedContent}</Markdown>
+
+  };
+
   return (
-    <Container className={darkMode ? 'dark-mode' : ''}>
+    <Container fluid className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       <Row>
-        <Col md={4}>
+        <Col md={3}>
           <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
             <Card.Body>
               <Card.Title>Conversations</Card.Title>
@@ -139,11 +145,12 @@ function Chat( ) {
                 {conversations.map((conversation) => (
                   <li
                     key={conversation.id}
-                    className={`list-group-item ${darkMode ? 'bg-dark text-light' : ''}`}
+                    className={`list-group-item ${
+                      conversation === selectedConversation ? 'active' : ''
+                    } ${darkMode ? 'bg-dark text-light' : ''}`}
+                    onClick={() => handleConversationClick(conversation)}
                   >
-                    <Link to={`/conversations/${conversation.id}`} className="text-decoration-none">
-                      {conversation.language.name}
-                    </Link>
+                    {conversation.language.name}
                   </li>
                 ))}
               </ul>
@@ -180,15 +187,55 @@ function Chat( ) {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={8}>
-          <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
-            <Card.Body>
-              <Card.Title>Select a conversation to start chatting.</Card.Title>
-            </Card.Body>
-          </Card>
+        <Col md={9}>
+          {selectedConversation ? (
+            <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
+              <Card.Body>
+                <Card.Title>{selectedConversation.language.name} Conversation</Card.Title>
+                <div className="messages">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`message ${
+                        message.sender === 'user' ? 'user-message' : 'ai-message'
+                      } ${darkMode ? 'bg-secondary text-light' : ''}`}
+                    >
+                      <strong>{message.sender === 'user' ? 'You' : 'AI Teacher'}:</strong>
+                      <div className="message-content">
+                        {renderMarkdown(message.content)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Form onSubmit={handleSendMessage}>
+                  <Form.Group controlId="newMessage" className={`mb-3 ${darkMode ? 'bg-dark' : ''}`}>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      required
+                      className={`${darkMode ? 'bg-dark text-light' : ''}`}
+                    />
+                  </Form.Group>
+                  <Button variant={darkMode ? 'light' : 'primary'} type="submit">
+                    Send
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          ) : (
+            <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
+              <Card.Body>
+                <Card.Title>Select a conversation to start chatting.</Card.Title>
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>
   );
 }
+
 export default Chat;

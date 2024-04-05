@@ -1,13 +1,10 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-
-from languages.models import Language
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from django.conf import settings
 import google.generativeai as genai
 from rest_framework.permissions import IsAuthenticated
-
 
 class ConversationListCreateView(generics.ListCreateAPIView):
     serializer_class = ConversationSerializer
@@ -18,7 +15,6 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
 
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
@@ -107,9 +103,26 @@ class MessageListCreateView(generics.ListCreateAPIView):
             ]
         )
 
-        prompt = f"You are a teacher and master in the {conversation.language.name} language. Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.\n\nConversation history:\n{conversation_history}\n\nUser: {user_message}\nAI Teacher:"
+        prompt = f"""
+        You are a teacher and master in the {conversation.language.name} language. Use only markdown for outputting, including tables. For tables, use the following markdown rendering:
+
+        | Syntax      | Description |
+        | ----------- | ----------- |
+        | Header      | Title       |
+        | Paragraph   | Text        |
+
+        For newline characters inside table cells, use the special character sequence "\\n".
+
+        Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.
+
+        Conversation history:
+        {conversation_history}
+
+        User: {user_message}
+        AI Teacher:
+        """
 
         response = model.generate_content(prompt)
-        bot_response = response.text.strip()
-
+        bot_response = response.text.replace("\n", "\\n")
+        # print(bot_response)
         return bot_response

@@ -7,7 +7,7 @@ function Navigation({ darkMode, toggleDarkMode }) {
   const loggedIn = isLoggedIn();
 
   return (
-    <Navbar bg={darkMode ? 'dark' : 'light'} variant={darkMode ? 'dark' : 'light'} expand="lg" className={darkMode ? 'dark-mode' : ''}>
+    <Navbar bg={darkMode ? 'dark' : 'light'} variant={darkMode ? 'dark' : 'light'} expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
           aiLingo

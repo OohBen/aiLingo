@@ -87,7 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "aiLingo.wsgi.application"
 
-CORS_ORIGIN_WHITELIST = ['https://studious-bassoon-5pr4677rw7v34764-3000.app.github.dev']
+CORS_ORIGIN_WHITELIST = ['https://studious-bassoon-5pr4677rw7v34764-3000.app.github.dev','http://localhost:3000']
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
