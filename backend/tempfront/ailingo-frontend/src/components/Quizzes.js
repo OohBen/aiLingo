@@ -12,7 +12,7 @@ function Quizzes() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await axiosInstance.get('http://localhost:8000/api/quizzes/');
+      const response = await axiosInstance.get('quizzes/');
       setQuizzes(response.data);
     } catch (error) {
       console.error(error);

@@ -16,7 +16,7 @@ function QuizDetails() {
 
   const fetchQuizDetails = async () => {
     try {
-      const response = await axiosInstance.get(`http://localhost:8000/api/quizzes/${id}/`);
+      const response = await axiosInstance.get('quizzes/${id}/');
       setQuiz(response.data);
     } catch (error) {
       console.error(error);
@@ -25,7 +25,7 @@ function QuizDetails() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axiosInstance.get(`http://localhost:8000/api/quizzes/${id}/questions/`);
+      const response = await axiosInstance.get(`quizzes/${id}/questions/`);
       setQuestions(response.data);
     } catch (error) {
       console.error(error);
@@ -60,7 +60,7 @@ function QuizDetails() {
     };
 
     try {
-      await axiosInstance.post('http://localhost:8000/api/quizzes/attempt/', attemptData);
+      await axiosInstance.post('/quizzes/attempt/', attemptData);
       // Redirect to the analytics dashboard or display a success message
       navigate('/analytics');
     } catch (error) {

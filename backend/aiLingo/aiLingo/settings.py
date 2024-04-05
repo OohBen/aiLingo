@@ -19,7 +19,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -87,9 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "aiLingo.wsgi.application"
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",  # Add the URL of your React frontend
-]
+CORS_ORIGIN_WHITELIST = ['https://studious-bassoon-5pr4677rw7v34764-3000.app.github.dev']
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 

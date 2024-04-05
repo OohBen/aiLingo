@@ -17,7 +17,7 @@ function QuizAttempt() {
 
   const fetchQuizDetails = async () => {
     try {
-      const response = await axiosInstance.get(`http://localhost:8000/api/quizzes/${id}/`);
+      const response = await axiosInstance.get(`quizzes/${id}/`);
       setQuiz(response.data);
     } catch (error) {
       console.error(error);
@@ -26,7 +26,7 @@ function QuizAttempt() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axiosInstance.get(`http://localhost:8000/api/quizzes/${id}/questions/`);
+      const response = await axiosInstance.get(`quizzes/${id}/questions/`);
       setQuestions(response.data);
     } catch (error) {
       console.error(error);
@@ -42,7 +42,7 @@ function QuizAttempt() {
 
   const handleQuizSubmit = async () => {
     try {
-      const response = await axiosInstance.post('http://localhost:8000/api/quizzes/attempt/', {
+      const response = await axiosInstance.post('quizzes/attempt/', {
         quiz: quiz.id,
         user_answers: userAnswers,
       });

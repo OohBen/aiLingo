@@ -13,9 +13,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = ["id", "language", "created_at"]
 
     def create(self, validated_data):
-        language_data = validated_data.pop("language")
-        language_id = language_data["id"]
-        language = Language.objects.get(id=language_id)
+        language = validated_data.pop("language")
         conversation = Conversation.objects.create(language=language, **validated_data)
         return conversation
 

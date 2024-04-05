@@ -18,7 +18,7 @@ function CreateQuiz() {
 
   const fetchLanguages = async () => {
     try {
-      const response = await axiosInstance.get('http://localhost:8000/api/languages/');
+      const response = await axiosInstance.get('/languages/');
       setLanguages(response.data);
     } catch (error) {
       console.error(error);
@@ -29,7 +29,7 @@ function CreateQuiz() {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axiosInstance.post('http://localhost:8000/api/quizzes/create/', {
+      const response = await axiosInstance.post('/quizzes/create/', {
         title,
         language,
         duration: 10,

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { refreshAccessToken } from './auth';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'https://studious-bassoon-5pr4677rw7v34764-8000.app.github.dev/api/',
 });
 
 axiosInstance.interceptors.request.use(
