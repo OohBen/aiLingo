@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('quizzes', '0002_initial'),
+        ("quizzes", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='choices',
+            model_name="question",
+            name="choices",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='question',
-            name='text',
+            model_name="question",
+            name="text",
             field=models.TextField(),
         ),
     ]

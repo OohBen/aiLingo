@@ -9,18 +9,22 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('quizzes', '0003_alter_question_choices_alter_question_text'),
+        ("quizzes", "0003_alter_question_choices_alter_question_text"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='quiz',
-            name='user',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="quiz",
+            name="user",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='question',
-            name='answer',
+            model_name="question",
+            name="answer",
             field=models.TextField(),
         ),
     ]

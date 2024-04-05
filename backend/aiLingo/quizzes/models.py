@@ -8,8 +8,11 @@ from languages.models import Language
 from django.db import models
 from django.conf import settings
 
+
 class Quiz(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1
+    )
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     duration = models.IntegerField()
@@ -17,6 +20,7 @@ class Quiz(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
@@ -28,6 +32,7 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text[:50]
+
 
 class Attempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

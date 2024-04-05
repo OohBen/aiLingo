@@ -115,6 +115,7 @@ form button:hover {
   color: green;
   margin-bottom: 10px;
 }
+
 .profile {
   background-color: #fff;
   padding: 20px;
@@ -146,6 +147,7 @@ form button:hover {
 .profile button:hover {
   background-color: #555;
 }
+
 .create-quiz-form {
   max-width: 400px;
   margin: 0 auto;
@@ -187,6 +189,7 @@ form button:hover {
   color: red;
   margin-bottom: 10px;
 }
+
 /* Global Styles */
 body {
   font-family: 'Roboto', sans-serif;
@@ -349,6 +352,7 @@ form button:hover {
 .profile button:hover {
   background-color: #c0392b;
 }
+
 .quiz-list {
   list-style-type: none;
   padding: 0;
@@ -392,6 +396,7 @@ form button:hover {
   background-color: #f9f9f9;
   border-radius: 4px;
 }
+
 .question-item {
   cursor: pointer;
   margin-bottom: 20px;
@@ -417,6 +422,7 @@ form button:hover {
   background-color: #e0f0ff;
   border-radius: 4px;
 }
+
 .question-item {
   margin-bottom: 30px;
 }
@@ -460,6 +466,7 @@ form button:hover {
   max-height: 100px;
   padding: 15px;
 }
+
 .question-choices li {
   cursor: pointer;
   margin-bottom: 10px;
@@ -495,10 +502,12 @@ form button:hover {
   background-color: #f8f8f8;
   border-radius: 4px;
 }
+
 @keyframes spinner {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

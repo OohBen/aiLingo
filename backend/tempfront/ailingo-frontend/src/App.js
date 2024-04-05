@@ -27,22 +27,22 @@ function App() {
       <div className={darkMode ? 'dark-mode' : ''}>
         <Navigation darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <Container>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/languages" element={<Languages />} />
-          <Route path="/lessons" element={<Lessons />} />
-          <Route path="/quizzes" element={<Quizzes />} />
-          <Route path="/quizzes/:id" element={<QuizAttempt />} />
-          <Route path="/generate-question" element={<GenerateQuestion />} />
-          <Route path="/create-quiz" element={<CreateQuiz />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/conversations/:id" element={<ConversationPage darkMode={darkMode} />} />
-        </Routes>
-      </Container>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/languages" element={<Languages />} />
+            <Route path="/lessons" element={<Lessons />} />
+            <Route path="/quizzes" element={<Quizzes />} />
+            <Route path="/quizzes/:id" element={<QuizAttempt />} />
+            <Route path="/generate-question" element={<GenerateQuestion />} />
+            <Route path="/create-quiz" element={<CreateQuiz />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/conversations/:id" element={<ConversationPage darkMode={darkMode} />} />
+          </Routes>
+        </Container>
       </div>
     </Router>
   );

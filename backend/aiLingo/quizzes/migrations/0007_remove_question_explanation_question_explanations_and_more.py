@@ -6,22 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('quizzes', '0006_question_explanation'),
+        ("quizzes", "0006_question_explanation"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='question',
-            name='explanation',
+            model_name="question",
+            name="explanation",
         ),
         migrations.AddField(
-            model_name='question',
-            name='explanations',
+            model_name="question",
+            name="explanations",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='question',
-            name='answer',
+            model_name="question",
+            name="answer",
             field=models.IntegerField(),
         ),
     ]
