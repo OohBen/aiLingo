@@ -1,5 +1,3 @@
-// Analytics.js
-
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
@@ -51,7 +49,7 @@ function Analytics() {
               {analyticsData ? (
                 <>
                   <p>Total Quizzes: {analyticsData.total_quizzes}</p>
-                  <p>Average Score: {analyticsData.average_score.toFixed(2)}%</p>
+                  <p>Average Score: {analyticsData.average_score ? analyticsData.average_score.toFixed(2) : 'N/A'}%</p>
                   {renderChart()}
                 </>
               ) : (

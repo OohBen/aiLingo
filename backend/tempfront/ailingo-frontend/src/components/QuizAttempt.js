@@ -39,7 +39,9 @@ function QuizAttempt() {
       [questionId]: selectedAnswer,
     }));
   };
-
+  const isSubmitDisabled = () => {
+    return questions.some((question) => !userAnswers.hasOwnProperty(question.id));
+  };
   const handleQuizSubmit = async () => {
     try {
       const response = await axiosInstance.post('quizzes/attempt/', {
@@ -81,7 +83,9 @@ function QuizAttempt() {
         ))}
       </ul>
       {score === null ? (
-        <button onClick={handleQuizSubmit}>Submit Quiz</button>
+        <button onClick={handleQuizSubmit} disabled={isSubmitDisabled()}>
+          Submit Quiz
+        </button>
       ) : (
         <div>
           <h3>Score: {score}%</h3>
@@ -91,5 +95,6 @@ function QuizAttempt() {
     </div>
   );
 }
+
 
 export default QuizAttempt;

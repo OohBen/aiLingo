@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import axiosInstance from '../utils/axiosInstance';
 import { Link } from 'react-router-dom';
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 function Chat() {
   const [conversations, setConversations] = useState([]);
@@ -130,8 +130,7 @@ function Chat() {
 
   const renderMarkdown = (content) => {
     const processedContent = content.replace(/\\n/g, '\n');
-    return <Markdown remarkPlugins={[remarkGfm]}>{processedContent}</Markdown>
-
+    return <Markdown remarkPlugins={[remarkGfm]}>{processedContent}</Markdown>;
   };
 
   return (

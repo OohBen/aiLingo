@@ -32,8 +32,6 @@ function CreateQuiz() {
       const response = await axiosInstance.post('/quizzes/create/', {
         title,
         language,
-        duration: 10,
-        passing_score: 50,
       });
       console.log(response.data);
       setSuccess(true);
@@ -87,5 +85,6 @@ function CreateQuiz() {
     </div>
   );
 }
+
 
 export default CreateQuiz;

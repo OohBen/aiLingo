@@ -44,3 +44,18 @@
   background-color: #007bff;
   border-color: #007bff;
 }
+.question-choices li {
+  cursor: pointer;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.question-choices li:hover {
+  background-color: #f0f0f0;
+}
+
+.question-choices li.selected {
+  background-color: #e0f0ff;
+}

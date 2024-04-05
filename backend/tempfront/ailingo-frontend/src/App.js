@@ -18,7 +18,7 @@ import CreateQuiz from './components/CreateQuiz';
 import Profile from './components/Profile';
 import QuizAttempt from './components/QuizAttempt';
 import Chat from './components/Chat';
-
+import Analytics from './components/Analytics';
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -44,6 +44,7 @@ function App() {
           <Route path="/create-quiz" element={<CreateQuiz />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Routes>
       </Container>
       </div>

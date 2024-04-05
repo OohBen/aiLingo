@@ -11,7 +11,11 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ["id", "language", "title", "duration", "passing_score"]
+        fields = ['id', 'language', 'title', 'duration', 'passing_score']
+        extra_kwargs = {
+            'duration': {'required': False},
+            'passing_score': {'required': False},
+        }
 
 
 class AttemptSerializer(serializers.ModelSerializer):
