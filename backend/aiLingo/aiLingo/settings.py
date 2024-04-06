@@ -146,8 +146,6 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 GOOGLE_GENERATIVE_AI_API_KEY = os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
-print(GOOGLE_GENERATIVE_AI_API_KEY)
-print(ALLOWED_HOSTS)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
