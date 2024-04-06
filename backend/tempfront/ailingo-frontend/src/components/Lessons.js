@@ -10,7 +10,7 @@ function Lessons() {
 
   const fetchLessons = async () => {
     try {
-      const response = await axiosInstance.get('http://localhost:8000/api/lessons/');
+      const response = await axiosInstance.get('/lessons/');
       setLessons(response.data);
     } catch (error) {
       console.error(error);

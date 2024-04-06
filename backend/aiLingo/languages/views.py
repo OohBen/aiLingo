@@ -18,12 +18,6 @@ class LanguageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 class LanguageCreateView(generics.CreateAPIView):
     serializer_class = LanguageSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = []
 
-    def create(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
-            return Response(
-                {"error": "Only superusers can create languages."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().create(request, *args, **kwargs)
+

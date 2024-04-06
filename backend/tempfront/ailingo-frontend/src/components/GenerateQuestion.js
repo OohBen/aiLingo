@@ -9,7 +9,7 @@ function GenerateQuestion() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post(`http://localhost:8000/api/quizzes/${quizId}/generate-question/`, { prompt });
+      const response = await axiosInstance.post(`/quizzes/${quizId}/generate-question/`, { prompt });
       setQuestion(response.data.question);
     } catch (error) {
       console.error(error);

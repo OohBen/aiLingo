@@ -2,7 +2,7 @@ import axios from 'axios';
 import { refreshAccessToken } from './auth';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://ailingo-production.up.railway.app/api/',
+  baseURL: 'https://ailingo-production.up.railway.app/api',
 });
 
 axiosInstance.interceptors.request.use(
