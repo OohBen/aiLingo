@@ -16,10 +16,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+APP_NAME = os.environ.get("FLY_APP_NAME")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 # ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = [f"{APP_NAME}.fly.dev"]
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -87,7 +89,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "aiLingo.wsgi.application"
 
-CORS_ORIGIN_WHITELIST = ['https://studious-bassoon-5pr4677rw7v34764-3000.app.github.dev','http://localhost:3000']
+CORS_ORIGIN_WHITELIST = ['https://ailingo-temp.vercel.app/','http://localhost:3000']
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 

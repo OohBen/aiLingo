@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from .models import Analytics
+from .models import UserAnalytics
 
-
-class AnalyticsSerializer(serializers.ModelSerializer):
+class UserAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Analytics
-        fields = ["user", "data"]
+        model = UserAnalytics
+        fields = ['user', 'language_progress', 'quiz_analytics', 'chat_analytics']

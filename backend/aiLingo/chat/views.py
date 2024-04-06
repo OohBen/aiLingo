@@ -1,5 +1,7 @@
+import json
 from rest_framework import generics, status
 from rest_framework.response import Response
+from languages.models import Language
 from quizzes.models import Quiz
 from quizzes.serializers import QuestionSerializer
 from .models import Conversation, Message
@@ -7,6 +9,7 @@ from .serializers import ConversationSerializer, MessageSerializer
 from django.conf import settings
 import google.generativeai as genai
 from rest_framework.permissions import IsAuthenticated
+from analytics.models import UserAnalytics
 
 class ConversationListCreateView(generics.ListCreateAPIView):
     serializer_class = ConversationSerializer
@@ -14,19 +17,19 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Conversation.objects.filter(user=self.request.user)
-
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
+        language_id = self.request.data.get('language', {}).get('id')
+        title = self.request.data.get('title')
+        serializer.save(user=self.request.user, language_id=language_id, title=title)
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+
     def parse_quiz_data(self, text: str):
         quiz_data = {}
         lines = text[text.find("___quiz!!!___"):].strip().split("\n")
 
         for line in lines:
-            print(line)
             if line.startswith("Quiz Title:"):
                 quiz_data["title"] = line.split("Quiz Title:")[1].strip()
             elif line.startswith("Duration:"):
@@ -52,7 +55,17 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 question_data["worth"] = int(line.split("w:")[1].strip())
                 quiz_data["questions"].append(question_data)
 
-        return quiz_data
+        return quiz_data if "title" in quiz_data and "duration" in quiz_data and "passing_score" in quiz_data and "questions" in quiz_data else None
+    def extract_topic_scores(self, text):
+        # Implement your logic to extract topic scores from the AI response
+        # For example, you can look for specific patterns or keywords in the text
+        # and assign scores based on their occurrence or relevance
+        # Add the extracted topic scores to the topic_scores dictionary
+        print(text)
+        topic_scores = json.loads(text.strip().replace("'", "\""))
+        # Extract topic scores from the text
+        print(topic_scores)
+        return topic_scores
 
     def get_queryset(self):
         conversation_id = self.kwargs["conversation_id"]
@@ -119,51 +132,49 @@ class MessageListCreateView(generics.ListCreateAPIView):
         home_language = (
             request.user.home_language.name if request.user.home_language else "English"
         )
-        prompt = f"""
-                For newline characters inside table cells, use the special character sequence "\\n".
-                You are a teacher and master in the {conversation.language.name} language. Use only markdown for outputting, including tables. For tables, use the following markdown rendering, :
+        prompt_parts = [
+                    f"You are a teacher of the language mentioned in the prompt. Reply in the language of the user, {home_language} and make sure to have examples of use cases when teaching. Be supportive and helpful.",
+                    "Unless specified, generate 5 example questions.",
+                    "When giving the answer key to questions, ADD 888333 ANSWERKEY 888333, then on the next line, add the answers.",
+                    f"For newline characters inside table cells, use the special character sequence \"\\n\".",
+                    f"You are a teacher and master in the {conversation.language.name} language. Use only markdown for outputting, including tables. For tables, use the following markdown rendering, :\n\n| Syntax      | Description |\n| ----------- | ----------- |\n| Header      | Title       |\n| Paragraph   | Text        |",
+                    "Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.",
+                    f"If the user asks for a quiz, FIRST add ___quiz!!!___ then generate a quiz with the following strict format:",
+                    "Quiz Title: <quiz_title>",
+                    "Duration: <duration_in_minutes>",
+                    "Passing Score: <passing_score_percentage>",
+                    "Then generate 5 multiple-choice questions for the quiz, each with the following strict format:",
+                    "q: <question_text>",
+                    "c1: <choice_1>",
+                    "e1: <explanation_for_choice_1_in_{home_language}>",
+                    "c2: <choice_2>",
+                    "e2: <explanation_for_choice_2_in_{home_language}>",
+                    "c3: <choice_3>",
+                    "e3: <explanation_for_choice_3_in_{home_language}>",
+                    "c4: <choice_4>",
+                    "e4: <explanation_for_choice_4_in_{home_language}>",
+                    "a: <correct_answer_choice_number>",
+                    "w: <worth_of_question_as_integer>",
+                    "Make sure to include all the required components for the quiz and each question. Provide the entire quiz in the specified strict format, with each question starting on a new line. If the user's message does not explicitly ask for a quiz, do not generate one.",
+                    "At the end of each message, add a dictionary with the topic scores for the message, explaining bascialyl what subhjects you taught during this interaction. For example:",
+                    "!!!TOPICS!!!: {'subjunctive': 0.1, 'travel vocab': 0.3, 'past perfect': 0.6}",
+                    "Make sure to include the entire dictionary with the topic scores at the end of each message. And in the format of the example. should be the last lines of the message. Begin the dictionary with !!!TOPICS!!!: and then the dictionary in the format shown.",
+                    f"Conversation history:\n{conversation_history}",
+                    f"User: {user_message}",
+                    "AI Teacher:",
+                ]
 
-                | Syntax      | Description |
-                | ----------- | ----------- |
-                | Header      | Title       |
-                | Paragraph   | Text        |
-
-
-                Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.
-                If the user asks for a quiz, FIRST add ___quiz!!!___ then generate a quiz with the following strict format:
-
-                Quiz Title: <quiz_title>
-                Duration: <duration_in_minutes>
-                Passing Score: <passing_score_percentage>
-
-                Then generate 5 multiple-choice questions for the quiz, each with the following strict format:
-
-                q: <question_text>
-                c1: <choice_1>
-                e1: <explanation_for_choice_1_in_{home_language}>
-                c2: <choice_2>
-                e2: <explanation_for_choice_2_in_{home_language}>
-                c3: <choice_3>
-                e3: <explanation_for_choice_3_in_{home_language}>
-                c4: <choice_4>
-                e4: <explanation_for_choice_4_in_{home_language}>
-                a: <correct_answer_choice_number>
-                w: <worth_of_question_as_integer>
-
-                Make sure to include all the required components for the quiz and each question. Provide the entire quiz in the specified strict format, with each question starting on a new line.
-
-                Conversation history:
-                {conversation_history}
-
-                User: {user_message}
-                AI Teacher:
-                """
+        prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        bot_response = response.text.replace("\n", "\\n")
+        # print(response._error)
+        # print(response.candidates[0].safety_ratings)
+        topics = response.text[response.text.find("!!!TOPICS!!!") + 13 :]
+        response = response.text[: response.text.find("!!!TOPICS!!!")]
+        bot_response = response.replace("\n", "\\n")
 
-        if "___quiz!!!___" in response.text:
-            quiz_data = self.parse_quiz_data(response.text)
+        if "___quiz!!!___" in response:
+            quiz_data = self.parse_quiz_data(response)
             if quiz_data:
                 quiz = Quiz.objects.create(
                     language=conversation.language,
@@ -179,7 +190,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
                 
-                bot_response += f"\n\nQuiz created successfully! You can access the quiz at: /quizzes/{quiz.id}"
+                bot_response += f"\n\nQuiz created successfully! You can access the quiz here: [Take Quiz](/quizzes/{quiz.id})"
 
         
         bot_message_serializer = MessageSerializer(
@@ -192,6 +203,8 @@ class MessageListCreateView(generics.ListCreateAPIView):
         bot_message_serializer.is_valid(raise_exception=True)
         bot_message_serializer.save()
 
+        topic_scores = self.extract_topic_scores(topics)
+        user_analytics, _ = UserAnalytics.objects.get_or_create(user=request.user)
+        user_analytics.update_chat_analytics(conversation.language, len(user_message), topic_scores)
+
         return Response(bot_message_serializer.data, status=status.HTTP_201_CREATED)
-
-

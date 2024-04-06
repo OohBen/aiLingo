@@ -6,9 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Attempt, Question, Quiz
 from .serializers import AttemptSerializer, QuestionSerializer, QuizSerializer
 import google.generativeai as genai
-from analytics.models import Analytics
-from analytics.serializers import AnalyticsSerializer
-from django.db.models import Avg
+from analytics.models import UserAnalytics
 
 class CreateQuizView(generics.CreateAPIView):
     serializer_class = QuizSerializer
@@ -18,72 +16,27 @@ class CreateQuizView(generics.CreateAPIView):
         serializer = QuizSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-
         genai.configure(api_key=settings.GOOGLE_GENERATIVE_AI_API_KEY)
 
-        generation_config = {
-            "temperature": 0.9,
-            "top_p": 1,
-            "top_k": 1,
-            "max_output_tokens": 2048,
-        }
-
-        safety_settings = [
-            {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-            },
-        ]
-
         model = genai.GenerativeModel(
-            model_name="gemini-1.0-pro",
-            generation_config=generation_config,
-            safety_settings=safety_settings,
+            model_name="text-bison-001",
+            temperature=0.9,
+            max_output_tokens=1024,
         )
 
-        home_language = request.user.home_language.name if request.user.home_language else "English"
-        prompt = f"Generate a quiz titled '{request.data['title']}' in the {request.data['language']} language with the following components:\n\n1. Duration in minutes (e.g., duration: 20)\n2. Passing score as a percentage (e.g., passing_score: 75)\n3. Five multiple-choice questions, each with the following strict format:\n\nq: <question_text>\nc1: <choice_1>\ne1: <explanation_for_choice_1_in_{home_language}>\nc2: <choice_2>\ne2: <explanation_for_choice_2_in_{home_language}>\nc3: <choice_3>\ne3: <explanation_for_choice_3_in_{home_language}>\nc4: <choice_4>\ne4: <explanation_for_choice_4_in_{home_language}>\na: <correct_answer_choice_number>\nw: <worth_of_question_as_integer>\n\nProvide the entire quiz in the specified strict format, with each question starting on a new line. The duration and passing score must be provided in the exact format specified above."
+        prompt_parts = [
+            "You are a teacher of the language mentioned in the prompt. Reply in the language of the prompt and make sure to have examples of use cases when teaching. Be supportive and helpful.",
+            "Unless specified, generate 5 example questions.",
+            "When giving the answer key to questions, ADD 888333 ANSWERKEY 888333, then on the next line, add the answers.",
+            f"Create a quiz titled '{request.data['title']}' in the {request.data['language']} language.",
+        ]
+
+        prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        generated_text = response.text.strip()
+        generated_text = response.result.text.strip()
 
-        duration_match = re.search(r"duration:\s*(\d+)", generated_text)
-        passing_score_match = re.search(r"passing_score:\s*(\d+)", generated_text)
-
-        if duration_match:
-            duration = int(duration_match.group(1))
-        else:
-            duration = 12  # Default duration if not provided by AI
-
-        if passing_score_match:
-            passing_score = int(passing_score_match.group(1))
-        else:
-            passing_score = 52  # Default passing score if not provided by AI
-
-        quiz = serializer.save(user=self.request.user, duration=duration, passing_score=passing_score)
-
-        generated_text = response.text.strip()
-
-        duration_match = re.search(r"duration:\s*(\d+)", generated_text)
-        passing_score_match = re.search(r"passing_score:\s*(\d+)", generated_text)
-
-        if duration_match:
-            quiz.duration = int(duration_match.group(1))
-        if passing_score_match:
-            quiz.passing_score = int(passing_score_match.group(1))
-        quiz.save()
+        quiz = serializer.save(user=self.request.user)
 
         questions_data = self.parse_generated_questions(generated_text)
         for question_data in questions_data:
@@ -111,22 +64,10 @@ class CreateQuizView(generics.CreateAPIView):
                         if "choices" not in question_data:
                             question_data["choices"] = []
                         question_data["choices"].append(value)
-                    elif key.startswith("e"):
-                        if "explanations" not in question_data:
-                            question_data["explanations"] = []
-                        question_data["explanations"].append(value)
                     elif key == "a":
                         question_data["answer"] = int(value)
-                    elif key == "w":
-                        question_data["worth"] = int(value)
 
-            if (
-                "text" in question_data
-                and "choices" in question_data
-                and "answer" in question_data
-                and "explanations" in question_data
-                and "worth" in question_data
-            ):
+            if "text" in question_data and "choices" in question_data and "answer" in question_data:
                 questions_data.append(question_data)
 
         return questions_data
@@ -136,9 +77,6 @@ class QuizListCreateView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
 
-    def get_queryset(self):
-        return Quiz.objects.filter(user=self.request.user)
-
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -146,9 +84,6 @@ class QuizRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
-
-    def get_queryset(self):
-        return Quiz.objects.filter(user=self.request.user)
 
 class QuizQuestionsView(generics.ListAPIView):
     serializer_class = QuestionSerializer
@@ -177,37 +112,16 @@ class QuizAttemptView(generics.CreateAPIView):
             if question.answer == user_answer:
                 total_score += question.worth
 
-        score = (total_score / max_score) * 100 if max_score > 0 else 0
+        score = (total_score / max_score) * 100
         attempt = Attempt.objects.create(user=user, quiz=quiz, score=score)
         serializer = self.get_serializer(attempt)
 
-        quiz_count = Attempt.objects.filter(
-            user=user, quiz__language=quiz.language
-        ).count()
-        average_score = (
-            Attempt.objects.filter(user=user, quiz__language=quiz.language).aggregate(
-                Avg("score")
-            )["score__avg"]
-            or 0
-        )
-        topic_preferences = {}
-
+        topic_scores = {}
         for question in quiz.question_set.all():
             if question.answer == user_answers.get(str(question.id)):
-                topic_preferences[question.text] = question.worth
+                topic_scores[question.text] = question.worth
 
-        analytics_data = {
-            "quiz_count": quiz_count,
-            "average_score": average_score,
-            "topic_preferences": topic_preferences,
-        }
-
-        if analytics_data is None:
-            analytics_data = {}
-        analytics_serializer = AnalyticsSerializer(
-            data={"user": user.id, "data": analytics_data}
-        )
-        if analytics_serializer.is_valid(raise_exception=True):
-            analytics_serializer.save()
+        user_analytics, _ = UserAnalytics.objects.get_or_create(user=user)
+        user_analytics.update_quiz_analytics(quiz.language, score, topic_scores)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)

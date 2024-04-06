@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { isLoggedIn } from '../utils/auth';
 
 function Navigation({ darkMode, toggleDarkMode }) {
-  const loggedIn = isLoggedIn();
+    const [loggedIn, setLoggedIn] = useState(isLoggedIn());
 
-  return (
+    useEffect(() => {
+      const handleStorageChange = () => {
+        setLoggedIn(isLoggedIn());
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    }, []);
+    return (
     <Navbar bg={darkMode ? 'dark' : 'light'} variant={darkMode ? 'dark' : 'light'} expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">

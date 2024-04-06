@@ -47,6 +47,8 @@ combined_content = traverse_folder(folder_path, combined_content)
 # Get the output file path from the user
 
 # Write the combined content to the output file
+#clear the file
+write_to_file(output_file_path, "")
 write_to_file(output_file_path, combined_content)
 
 print("Files combined successfully!")

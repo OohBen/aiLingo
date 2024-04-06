@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import axiosInstance from '../utils/axiosInstance';
-import { Link } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -11,10 +10,13 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [newConversationLanguage, setNewConversationLanguage] = useState('');
+  const [newConversationTitle, setNewConversationTitle] = useState('');
   const [languages, setLanguages] = useState([]);
   const [isSuperuser, setIsSuperuser] = useState(false);
   const [homeLanguage, setHomeLanguage] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     fetchConversations();
@@ -26,6 +28,7 @@ function Chat() {
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages();
+      scrollToBottom();
     }
   }, [selectedConversation]);
 
@@ -80,14 +83,20 @@ function Chat() {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+
+    setIsLoading(true);
+
     try {
       const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
-        content: `Please respond using only markdown:\n\n${newMessage}`,
+        content: newMessage,
       });
-      setMessages([...messages, response.data]);
+      setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,11 +106,19 @@ function Chat() {
       const selectedLanguage = languages.find(
         (lang) => lang.id === parseInt(newConversationLanguage)
       );
-      const response = await axiosInstance.post('/chat/conversations/', {
-        language: selectedLanguage,
-      });
-      setConversations([...conversations, response.data]);
-      setNewConversationLanguage('');
+      if (!newConversationTitle) {
+        setNewConversationTitle(prompt('Enter a title for the new conversation:'));
+      }
+      if (newConversationTitle && selectedLanguage) {
+        const response = await axiosInstance.post('/chat/conversations/', {
+          language: selectedLanguage,
+          title: newConversationTitle,
+        });
+        setConversations([...conversations, response.data]);
+        setSelectedConversation(response.data);
+        setNewConversationLanguage('');
+        setNewConversationTitle('');
+      }
     } catch (error) {
       console.error('Error creating new conversation:', error);
     }
@@ -128,9 +145,25 @@ function Chat() {
     setDarkMode(!darkMode);
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const renderMarkdown = (content) => {
     const processedContent = content.replace(/\\n/g, '\n');
-    return <Markdown remarkPlugins={[remarkGfm]}>{processedContent}</Markdown>;
+    const quizLinkRegex = /\[Take Quiz\]\((\/quizzes\/\d+)\)/g;
+    const contentWithoutQuizLink = processedContent.replace(quizLinkRegex, '');
+
+    return (
+      <>
+        <Markdown remarkPlugins={[remarkGfm]}>{contentWithoutQuizLink}</Markdown>
+        {quizLinkRegex.test(processedContent) && (
+          <a href={processedContent.match(quizLinkRegex)[0].split('(')[1].slice(0, -1)} target="_blank" rel="noopener noreferrer">
+            Take Quiz
+          </a>
+        )}
+      </>
+    );
   };
 
   return (
@@ -144,12 +177,10 @@ function Chat() {
                 {conversations.map((conversation) => (
                   <li
                     key={conversation.id}
-                    className={`list-group-item ${
-                      conversation === selectedConversation ? 'active' : ''
-                    } ${darkMode ? 'bg-dark text-light' : ''}`}
+                    className={`list-group-item ${conversation === selectedConversation ? 'active' : ''} ${darkMode ? 'bg-dark text-light' : ''}`}
                     onClick={() => handleConversationClick(conversation)}
                   >
-                    {conversation.language.name}
+                    {conversation.title} ({conversation.language.name})
                   </li>
                 ))}
               </ul>
@@ -169,6 +200,16 @@ function Chat() {
                       </option>
                     ))}
                   </Form.Control>
+                </Form.Group>
+                <Form.Group controlId="newConversationTitle">
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter a title for the new conversation"
+                    value={newConversationTitle}
+                    onChange={(e) => setNewConversationTitle(e.target.value)}
+                    required
+                    className={darkMode ? 'bg-dark text-light' : ''}
+                  />
                 </Form.Group>
                 <Button variant={darkMode ? 'light' : 'primary'} type="submit" className="mt-2">
                   New Conversation
@@ -190,14 +231,12 @@ function Chat() {
           {selectedConversation ? (
             <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
               <Card.Body>
-                <Card.Title>{selectedConversation.language.name} Conversation</Card.Title>
+                <Card.Title>{selectedConversation.title} ({selectedConversation.language.name})</Card.Title>
                 <div className="messages">
-                  {messages.map((message) => (
+                  {messages.map((message, index) => (
                     <div
-                      key={message.id}
-                      className={`message ${
-                        message.sender === 'user' ? 'user-message' : 'ai-message'
-                      } ${darkMode ? 'bg-secondary text-light' : ''}`}
+                      key={index}
+                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'} ${darkMode ? 'bg-secondary text-light' : ''}`}
                     >
                       <strong>{message.sender === 'user' ? 'You' : 'AI Teacher'}:</strong>
                       <div className="message-content">
@@ -205,6 +244,7 @@ function Chat() {
                       </div>
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
                 <Form onSubmit={handleSendMessage}>
                   <Form.Group controlId="newMessage" className={`mb-3 ${darkMode ? 'bg-dark' : ''}`}>

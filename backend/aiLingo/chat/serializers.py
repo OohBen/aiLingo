@@ -6,19 +6,18 @@ from languages.serializers import LanguageSerializer
 
 
 class ConversationSerializer(serializers.ModelSerializer):
-    language = LanguageSerializer()
+    language = LanguageSerializer(read_only=True)
 
     class Meta:
         model = Conversation
-        fields = ["id", "language", "created_at"]
+        fields = ["id", "language", "title", "created_at"]
 
     def create(self, validated_data):
-        language = Language.objects.get(code=validated_data["language"]["code"])
-        validated_data.pop("language")
-        conversation = Conversation.objects.create(language=language, **validated_data)
+        language_id = validated_data.pop("language_id")
+        language = Language.objects.get(id=language_id)
+        title = validated_data.pop("title")
+        conversation = Conversation.objects.create(language=language, title=title, **validated_data)
         return conversation
-
-
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
