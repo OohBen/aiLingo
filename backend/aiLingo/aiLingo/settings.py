@@ -16,13 +16,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
-APP_NAME = os.environ.get("FLY_APP_NAME")
+# APP_NAME = os.environ.get("FLY_APP_NAME")
 
 SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-#&"
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -145,6 +146,8 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 GOOGLE_GENERATIVE_AI_API_KEY = os.getenv("GOOGLE_GENERATIVE_AI_API_KEY")
+print(GOOGLE_GENERATIVE_AI_API_KEY)
+print(ALLOWED_HOSTS)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
