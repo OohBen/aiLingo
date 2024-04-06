@@ -90,6 +90,7 @@ WSGI_APPLICATION = "aiLingo.wsgi.application"
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/ailingo-temp(?:-\w+)*\.vercel\.app$",
+    r"http:\/\/localhost:\d+",
 ]
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
