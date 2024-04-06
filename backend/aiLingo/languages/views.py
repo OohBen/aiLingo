@@ -19,5 +19,7 @@ class LanguageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 class LanguageCreateView(generics.CreateAPIView):
     serializer_class = LanguageSerializer
     permission_classes = []
+    authentication_classes = []
+    
 
 
