@@ -12,6 +12,7 @@ function Languages() {
     try {
       const response = await axiosInstance.get('languages/');
       setLanguages(response.data);
+      
     } catch (error) {
       console.error(error);
     }
