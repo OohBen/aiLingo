@@ -88,7 +88,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "aiLingo.wsgi.application"
 
-CORS_ORIGIN_WHITELIST = ['*']
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://ailingo-temp\..*\.vercel\.app$",
+]
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
