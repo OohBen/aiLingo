@@ -20,8 +20,7 @@ APP_NAME = os.environ.get("FLY_APP_NAME")
 
 SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-#&"
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
-ALLOWED_HOSTS = [f"{APP_NAME}.fly.dev"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,7 +34,6 @@ SECRET_KEY = SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
