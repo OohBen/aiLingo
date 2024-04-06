@@ -10,7 +10,7 @@ function Languages() {
 
   const fetchLanguages = async () => {
     try {
-      const response = await axiosInstance.get('api/languages/');
+      const response = await axiosInstance.get('languages/');
       setLanguages(response.data);
     } catch (error) {
       console.error(error);
