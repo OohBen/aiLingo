@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,6 +18,7 @@ function Chat() {
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchConversations();
@@ -93,6 +95,11 @@ function Chat() {
       });
       setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
       setNewMessage('');
+
+      if (response.data.content.includes('Quiz created successfully!')) {
+        const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
+        navigate(quizLink);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -150,34 +157,25 @@ function Chat() {
   };
 
   const renderMarkdown = (content) => {
-    const processedContent = content.replace(/\\n/g, '\n');
-    const quizLinkRegex = /\[Take Quiz\]\((\/quizzes\/\d+)\)/g;
-    const contentWithoutQuizLink = processedContent.replace(quizLinkRegex, '');
-
-    return (
-      <>
-        <Markdown remarkPlugins={[remarkGfm]}>{contentWithoutQuizLink}</Markdown>
-        {quizLinkRegex.test(processedContent) && (
-          <a href={processedContent.match(quizLinkRegex)[0].split('(')[1].slice(0, -1)} target="_blank" rel="noopener noreferrer">
-            Take Quiz
-          </a>
-        )}
-      </>
-    );
+    return <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>;
   };
 
   return (
     <Container fluid className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       <Row>
         <Col md={3}>
-          <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
+          <Card className={`conversations-card ${darkMode ? 'dark-mode' : ''}`}>
+            <Card.Header>
+              <h4>Conversations</h4>
+            </Card.Header>
             <Card.Body>
-              <Card.Title>Conversations</Card.Title>
-              <ul className="list-group">
+              <ul className="list-unstyled">
                 {conversations.map((conversation) => (
                   <li
                     key={conversation.id}
-                    className={`list-group-item ${conversation === selectedConversation ? 'active' : ''} ${darkMode ? 'bg-dark text-light' : ''}`}
+                    className={`conversation-item ${
+                      conversation === selectedConversation ? 'active' : ''
+                    } ${darkMode ? 'dark-mode' : ''}`}
                     onClick={() => handleConversationClick(conversation)}
                   >
                     {conversation.title} ({conversation.language.name})
@@ -191,7 +189,7 @@ function Chat() {
                     value={newConversationLanguage}
                     onChange={(e) => setNewConversationLanguage(e.target.value)}
                     required
-                    className={darkMode ? 'bg-dark text-light' : ''}
+                    className={darkMode ? 'dark-mode' : ''}
                   >
                     <option value="">Select Language</option>
                     {languages.map((language) => (
@@ -208,7 +206,7 @@ function Chat() {
                     value={newConversationTitle}
                     onChange={(e) => setNewConversationTitle(e.target.value)}
                     required
-                    className={darkMode ? 'bg-dark text-light' : ''}
+                    className={darkMode ? 'dark-mode' : ''}
                   />
                 </Form.Group>
                 <Button variant={darkMode ? 'light' : 'primary'} type="submit" className="mt-2">
@@ -229,25 +227,29 @@ function Chat() {
         </Col>
         <Col md={9}>
           {selectedConversation ? (
-            <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
+            <Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
+              <Card.Header>
+                <h4>
+                  {selectedConversation.title} ({selectedConversation.language.name})
+                </h4>
+              </Card.Header>
               <Card.Body>
-                <Card.Title>{selectedConversation.title} ({selectedConversation.language.name})</Card.Title>
-                <div className="messages">
+                <div className={`messages-container ${darkMode ? 'dark-mode' : ''}`}>
                   {messages.map((message, index) => (
                     <div
                       key={index}
-                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'} ${darkMode ? 'bg-secondary text-light' : ''}`}
+                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'} ${
+                        darkMode ? 'dark-mode' : ''
+                      }`}
                     >
                       <strong>{message.sender === 'user' ? 'You' : 'AI Teacher'}:</strong>
-                      <div className="message-content">
-                        {renderMarkdown(message.content)}
-                      </div>
+                      <div className="message-content">{renderMarkdown(message.content)}</div>
                     </div>
                   ))}
                   <div ref={messagesEndRef} />
                 </div>
                 <Form onSubmit={handleSendMessage}>
-                  <Form.Group controlId="newMessage" className={`mb-3 ${darkMode ? 'bg-dark' : ''}`}>
+                  <Form.Group controlId="newMessage" className={`mb-3 ${darkMode ? 'dark-mode' : ''}`}>
                     <Form.Control
                       as="textarea"
                       rows={3}
@@ -255,24 +257,31 @@ function Chat() {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       required
-                      className={`${darkMode ? 'bg-dark text-light' : ''}`}
+                      className={`${darkMode ? 'dark-mode' : ''}`}
                     />
                   </Form.Group>
-                  <Button variant={darkMode ? 'light' : 'primary'} type="submit">
-                    Send
+                  <Button variant={darkMode ? 'light' : 'primary'} type="submit" disabled={isLoading}>
+                    {isLoading ? 'Sending...' : 'Send'}
                   </Button>
                 </Form>
               </Card.Body>
             </Card>
           ) : (
-            <Card className={`mb-3 ${darkMode ? 'bg-dark text-light' : ''}`}>
+            <Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
               <Card.Body>
-                <Card.Title>Select a conversation to start chatting.</Card.Title>
+                <h4>Select a conversation to start chatting.</h4>
               </Card.Body>
             </Card>
           )}
         </Col>
       </Row>
+      <Button
+        variant={darkMode ? 'light' : 'dark'}
+        onClick={toggleDarkMode}
+        className="dark-mode-toggle"
+      >
+        {darkMode ? 'Light Mode' : 'Dark Mode'}
+      </Button>
     </Container>
   );
 }
