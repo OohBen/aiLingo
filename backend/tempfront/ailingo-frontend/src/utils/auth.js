@@ -1,7 +1,7 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
-const BASE_URL = 'https://ailingo-production.up.railway.app/api';
+const BASE_URL = 'https://ailingo.onrender.com/api';
 
 export const loginUser = async (email, password) => {
   try {
