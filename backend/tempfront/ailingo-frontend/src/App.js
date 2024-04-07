@@ -19,6 +19,7 @@ import Profile from './components/Profile';
 import QuizAttempt from './components/QuizAttempt';
 import Chat from './components/Chat';
 import Analytics from './components/Analytics';
+import { AuthProvider } from './components/contexts/AuthContext';
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -27,28 +28,30 @@ function App() {
   };
 
   return (
-    <Router>
-    <div className={darkMode ? 'dark-mode' : ''}>
-    <Navigation darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <Container>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/languages" element={<Languages />} />
-          <Route path="/lessons" element={<Lessons />} />
-          <Route path="/quizzes" element={<Quizzes />} />
-          <Route path="/quizzes/:id" element={<QuizAttempt />} />
-          <Route path="/generate-question" element={<GenerateQuestion />} />
-          <Route path="/create-quiz" element={<CreateQuiz />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/analytics" element={<Analytics />} />
-        </Routes>
-      </Container>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className={darkMode ? 'dark-mode' : ''}>
+          <Navigation darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          <Container>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/languages" element={<Languages />} />
+              <Route path="/lessons" element={<Lessons />} />
+              <Route path="/quizzes" element={<Quizzes />} />
+              <Route path="/quizzes/:id" element={<QuizAttempt />} />
+              <Route path="/generate-question" element={<GenerateQuestion />} />
+              <Route path="/create-quiz" element={<CreateQuiz />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/analytics" element={<Analytics />} />
+            </Routes>
+          </Container>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

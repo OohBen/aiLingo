@@ -1,13 +1,11 @@
 from django.urls import path
 from .views import (
-    LanguageCreateView,
-    LanguageListView,
+    LanguageListCreateView,
     LanguageRetrieveUpdateDestroyView,
 )
 
 urlpatterns = [
-    path("", LanguageListView.as_view(), name="language-list"),
-    path("create/", LanguageCreateView.as_view(), name="language-create"),
+    path("", LanguageListCreateView.as_view(), name="language-list"),
     path(
         "<int:pk>/",
         LanguageRetrieveUpdateDestroyView.as_view(),

@@ -25,7 +25,7 @@ class Quiz(models.Model):
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     text = models.TextField()
-    choices = models.JSONField(null=True, blank=True)
+    choices = models.JSONField()
     answer = models.IntegerField()
     explanations = models.JSONField(null=True, blank=True)
     worth = models.IntegerField(default=1)

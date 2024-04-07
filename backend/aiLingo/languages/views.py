@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 
-class LanguageListView(generics.ListAPIView):
+class LanguageListCreateView(generics.ListCreateAPIView):
     permission_classes = []
     queryset = Language.objects.all()
     serializer_class = LanguageSerializer
@@ -16,9 +16,7 @@ class LanguageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LanguageSerializer
 
 
-class LanguageCreateView(generics.CreateAPIView):
-    serializer_class = LanguageSerializer
-    permission_classes = []
+
     
 
 

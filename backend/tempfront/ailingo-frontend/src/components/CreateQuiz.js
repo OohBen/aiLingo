@@ -33,11 +33,16 @@ function CreateQuiz() {
         title,
         language,
       });
-      console.log(response.data);
-      setSuccess(true);
-      setError('');
-      setLoading(false);
-      navigate('/quizzes');
+      if (response.data.questions && response.data.questions.length > 0) {
+        setSuccess(true);
+        setError('');
+        setLoading(false);
+        navigate('/quizzes');
+      } else {
+        setError('Failed to generate quiz questions.');
+        setSuccess(false);
+        setLoading(false);
+      }
     } catch (error) {
       console.error(error);
       setError('Failed to create quiz. Please try again.');
@@ -85,6 +90,5 @@ function CreateQuiz() {
     </div>
   );
 }
-
 
 export default CreateQuiz;

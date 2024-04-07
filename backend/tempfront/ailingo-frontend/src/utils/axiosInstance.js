@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { refreshAccessToken } from './auth';
+import { refreshAccessToken, logoutUser } from './auth';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://ailingo-production.up.railway.app/api',
+  baseURL: 'http://localhost:8000/api/',
 });
 
 axiosInstance.interceptors.request.use(
@@ -29,6 +29,9 @@ axiosInstance.interceptors.response.use(
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
+        // Logout the user if the refresh token is invalid
+        logoutUser();
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
-const BASE_URL = axiosInstance.BASE_URL;
+const BASE_URL = 'http://localhost:8000/api';
 
 export const loginUser = async (email, password) => {
   try {
@@ -42,6 +42,8 @@ export const refreshAccessToken = async () => {
     localStorage.setItem('access_token', response.data.access);
     return response.data.access;
   } catch (error) {
+    // Remove the invalid refresh token from local storage
+    localStorage.removeItem('refresh_token');
     throw error.response.data;
   }
 };
