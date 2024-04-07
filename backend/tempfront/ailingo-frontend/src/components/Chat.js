@@ -13,8 +13,6 @@ function Chat() {
   const [newConversationLanguage, setNewConversationLanguage] = useState('');
   const [newConversationTitle, setNewConversationTitle] = useState('');
   const [languages, setLanguages] = useState([]);
-  const [isSuperuser, setIsSuperuser] = useState(false);
-  const [homeLanguage, setHomeLanguage] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -23,14 +21,11 @@ function Chat() {
   useEffect(() => {
     fetchConversations();
     fetchLanguages();
-    checkSuperuser();
-    fetchHomeLanguage();
   }, []);
 
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages();
-      scrollToBottom();
     }
   }, [selectedConversation]);
 
@@ -61,31 +56,13 @@ function Chat() {
     }
   };
 
-  const checkSuperuser = async () => {
-    try {
-      const response = await axiosInstance.get('/users/profile/');
-      setIsSuperuser(response.data.is_superuser);
-    } catch (error) {
-      console.error('Error checking superuser status:', error);
-    }
-  };
-
-  const fetchHomeLanguage = async () => {
-    try {
-      const response = await axiosInstance.get('/users/profile/');
-      setHomeLanguage(response.data.home_language.name);
-    } catch (error) {
-      console.error('Error fetching home language:', error);
-    }
-  };
-
   const handleConversationClick = (conversation) => {
     setSelectedConversation(conversation);
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !newMessage.trim()) return;
 
     setIsLoading(true);
 
@@ -109,42 +86,22 @@ function Chat() {
 
   const handleNewConversation = async (e) => {
     e.preventDefault();
+    if (!newConversationTitle.trim() || !newConversationLanguage) return;
+
     try {
-      const selectedLanguage = languages.find(
-        (lang) => lang.id === parseInt(newConversationLanguage)
-      );
-      if (!newConversationTitle) {
-        setNewConversationTitle(prompt('Enter a title for the new conversation:'));
-      }
-      if (newConversationTitle && selectedLanguage) {
-        const response = await axiosInstance.post('/chat/conversations/', {
-          language: selectedLanguage,
-          title: newConversationTitle,
-        });
-        setConversations([...conversations, response.data]);
-        setSelectedConversation(response.data);
-        setNewConversationLanguage('');
-        setNewConversationTitle('');
-      }
+      const selectedLanguage = languages.find((lang) => lang.id === parseInt(newConversationLanguage));
+
+      const response = await axiosInstance.post('/chat/conversations/', {
+        language: selectedLanguage,
+        title: newConversationTitle,
+      });
+
+      setConversations([...conversations, response.data]);
+      setSelectedConversation(response.data);
+      setNewConversationLanguage('');
+      setNewConversationTitle('');
     } catch (error) {
       console.error('Error creating new conversation:', error);
-    }
-  };
-
-  const handleAddLanguage = async (e) => {
-    e.preventDefault();
-    const languageName = prompt('Enter the name of the new language:');
-    const languageCode = prompt('Enter the code for the new language:');
-    if (languageName && languageCode) {
-      try {
-        const response = await axiosInstance.post('/languages/', {
-          name: languageName,
-          code: languageCode,
-        });
-        setLanguages([...languages, response.data]);
-      } catch (error) {
-        console.error('Error adding new language:', error);
-      }
     }
   };
 
@@ -152,18 +109,34 @@ function Chat() {
     setDarkMode(!darkMode);
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const renderMarkdown = (content) => {
-    return <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>;
+    const quizDataRegex = /(?:^|\n)___quiz!!!___\n([\s\S]*?)(?=\n___quiz!!!___|\n*$)/g;
+    const quizData = [];
+
+    let match;
+    while ((match = quizDataRegex.exec(content)) !== null) {
+      quizData.push(match[1]);
+    }
+
+    const formattedContent = content.replace(quizDataRegex, '');
+
+    return (
+      <>
+        <Markdown remarkPlugins={[remarkGfm]}>{formattedContent}</Markdown>
+        {quizData.map((data, index) => (
+          <div key={index} className="quiz-container">
+            <h4>Quiz</h4>
+            <pre>{data}</pre>
+          </div>
+        ))}
+      </>
+    );
   };
 
   return (
     <Container fluid className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       <Row>
-        <Col md={3}>
+        <Col md={4}>
           <Card className={`conversations-card ${darkMode ? 'dark-mode' : ''}`}>
             <Card.Header>
               <h4>Conversations</h4>
@@ -173,23 +146,21 @@ function Chat() {
                 {conversations.map((conversation) => (
                   <li
                     key={conversation.id}
-                    className={`conversation-item ${
-                      conversation === selectedConversation ? 'active' : ''
-                    } ${darkMode ? 'dark-mode' : ''}`}
+                    className={`conversation-item ${conversation === selectedConversation ? 'active' : ''}`}
                     onClick={() => handleConversationClick(conversation)}
                   >
                     {conversation.title} ({conversation.language.name})
                   </li>
                 ))}
               </ul>
-              <Form onSubmit={handleNewConversation} className="mt-3">
+              <Form onSubmit={handleNewConversation}>
                 <Form.Group controlId="newConversationLanguage">
+                  <Form.Label>Language</Form.Label>
                   <Form.Control
                     as="select"
                     value={newConversationLanguage}
                     onChange={(e) => setNewConversationLanguage(e.target.value)}
                     required
-                    className={darkMode ? 'dark-mode' : ''}
                   >
                     <option value="">Select Language</option>
                     {languages.map((language) => (
@@ -200,47 +171,34 @@ function Chat() {
                   </Form.Control>
                 </Form.Group>
                 <Form.Group controlId="newConversationTitle">
+                  <Form.Label>Title</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter a title for the new conversation"
+                    placeholder="Enter conversation title"
                     value={newConversationTitle}
                     onChange={(e) => setNewConversationTitle(e.target.value)}
                     required
-                    className={darkMode ? 'dark-mode' : ''}
                   />
                 </Form.Group>
-                <Button variant={darkMode ? 'light' : 'primary'} type="submit" className="mt-2">
-                  New Conversation
+                <Button variant="primary" type="submit" className="mt-3">
+                  Create Conversation
                 </Button>
               </Form>
-              {isSuperuser && (
-                <Button
-                  variant={darkMode ? 'light' : 'secondary'}
-                  onClick={handleAddLanguage}
-                  className="mt-2"
-                >
-                  Add Language
-                </Button>
-              )}
             </Card.Body>
           </Card>
         </Col>
-        <Col md={9}>
+        <Col md={8}>
           {selectedConversation ? (
             <Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
               <Card.Header>
-                <h4>
-                  {selectedConversation.title} ({selectedConversation.language.name})
-                </h4>
+                <h4>{selectedConversation.title}</h4>
               </Card.Header>
               <Card.Body>
-                <div className={`messages-container ${darkMode ? 'dark-mode' : ''}`}>
+                <div className="messages-container">
                   {messages.map((message, index) => (
                     <div
                       key={index}
-                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'} ${
-                        darkMode ? 'dark-mode' : ''
-                      }`}
+                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}
                     >
                       <strong>{message.sender === 'user' ? 'You' : 'AI Teacher'}:</strong>
                       <div className="message-content">{renderMarkdown(message.content)}</div>
@@ -249,7 +207,8 @@ function Chat() {
                   <div ref={messagesEndRef} />
                 </div>
                 <Form onSubmit={handleSendMessage}>
-                  <Form.Group controlId="newMessage" className={`mb-3 ${darkMode ? 'dark-mode' : ''}`}>
+                  <Form.Group controlId="newMessage">
+                    <Form.Label>Message</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={3}
@@ -257,10 +216,9 @@ function Chat() {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       required
-                      className={`${darkMode ? 'dark-mode' : ''}`}
                     />
                   </Form.Group>
-                  <Button variant={darkMode ? 'light' : 'primary'} type="submit" disabled={isLoading}>
+                  <Button variant="primary" type="submit" disabled={isLoading} className="mt-3">
                     {isLoading ? 'Sending...' : 'Send'}
                   </Button>
                 </Form>
@@ -275,11 +233,7 @@ function Chat() {
           )}
         </Col>
       </Row>
-      <Button
-        variant={darkMode ? 'light' : 'dark'}
-        onClick={toggleDarkMode}
-        className="dark-mode-toggle"
-      >
+      <Button variant={darkMode ? 'light' : 'dark'} onClick={toggleDarkMode} className="mt-3">
         {darkMode ? 'Light Mode' : 'Dark Mode'}
       </Button>
     </Container>

@@ -244,7 +244,25 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
                 
+                # Reformat the quiz data for better user experience
+                formatted_quiz_data = {
+                    "id": quiz.id,
+                    "title": quiz.title,
+                    "duration": quiz.duration,
+                    "passing_score": quiz.passing_score,
+                    "questions": [],
+                }
+                for question in quiz.question_set.all():
+                    formatted_question = {
+                        "id": question.id,
+                        "text": question.text,
+                        "choices": question.choices,
+                        "explanations": question.explanations,
+                    }
+                    formatted_quiz_data["questions"].append(formatted_question)
+
                 bot_response += f"\n\nQuiz created successfully! You can access the quiz here: [Take Quiz](/quizzes/{quiz.id})"
+                bot_response += f"\n\nQuiz Data:\n```json\n{json.dumps(formatted_quiz_data, indent=2)}\n```"
         
         bot_message_serializer = MessageSerializer(
             data={

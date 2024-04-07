@@ -43,7 +43,6 @@ output_file_path = "test.txt"
 
 # Traverse the folder and subfolders
 combined_content = traverse_folder(folder_path, combined_content)
-
 # Get the output file path from the user
 
 # Write the combined content to the output file
