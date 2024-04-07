@@ -1,7 +1,7 @@
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
-const BASE_URL = 'https://ailingo.onrender.com/api';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ailingo.onrender.com/api';
 
 export const loginUser = async (email, password) => {
   try {
@@ -17,7 +17,7 @@ export const loginUser = async (email, password) => {
 
 export const registerUser = async (name, email, password, homeLanguage) => {
   try {
-    const response = await axiosInstance.post('/users/register/', {
+    const response = await axiosInstance.post('users/register/', {
       name,
       email,
       password,

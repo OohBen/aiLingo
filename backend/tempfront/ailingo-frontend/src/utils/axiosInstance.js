@@ -1,9 +1,14 @@
 import axios from 'axios';
 import { refreshAccessToken, logoutUser } from './auth';
 
+
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ailingo.onrender.com/api';
 const axiosInstance = axios.create({
-  baseURL: 'https://ailingo.onrender.com/api',
+  baseURL: BASE_URL,
 });
+
+console.log('BASE_URL:', BASE_URL);
+
 
 axiosInstance.interceptors.request.use(
   async (config) => {
