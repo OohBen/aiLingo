@@ -219,7 +219,6 @@ class MessageListCreateView(generics.ListCreateAPIView):
             f"User: {user_message}",
             "AI Teacher:",
         ]
-        print(user_message)
 
         prompt = "\n".join(prompt_parts)
 
@@ -262,8 +261,8 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     }
                     formatted_quiz_data["questions"].append(formatted_question)
 
-                bot_response += f"\n\nQuiz created successfully! You can access the quiz here: [Take Quiz](/quizzes/{quiz.id})"
-                bot_response += f"\n\nQuiz Data:\n```json\n{json.dumps(formatted_quiz_data, indent=2)}\n```"
+                bot_response += f"\n\nQuiz created successfully! You can access the quiz here: [Take Quiz](/quizzes/{quiz.id+1})"
+                # bot_response += f"\n\nQuiz Data:\n```json\n{json.dumps(formatted_quiz_data, indent=2)}\n```"
         
         bot_message_serializer = MessageSerializer(
             data={
