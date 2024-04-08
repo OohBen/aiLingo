@@ -95,3 +95,19 @@ body {
   background-color: var(--dark-color);
   color: var(--light-color);
 }
+.message {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.user-message {
+  background-color: #f0f0f0;
+  align-self: flex-end;
+}
+
+.ai-message {
+  background-color: #e0f0ff;
+  align-self: flex-start;
+}

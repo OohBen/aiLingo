@@ -260,3 +260,5 @@ class MessageListCreateView(generics.ListCreateAPIView):
         topic_scores = self.extract_topic_scores(topics)
         user_analytics, _ = UserAnalytics.objects.get_or_create(user=request.user)
         user_analytics.update_chat_analytics(conversation.language, len(user_message), topic_scores)
+        return Response(bot_message_serializer.data, status=status.HTTP_201_CREATED)
+ 

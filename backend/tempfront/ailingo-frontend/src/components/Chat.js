@@ -61,29 +61,30 @@ function Chat() {
   };
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (isLoading || !newMessage.trim()) return;
-
-    setIsLoading(true);
-
-    try {
-      const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
-        content: newMessage,
-      });
-      setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
-      setNewMessage('');
-
-      if (response.data.content.includes('Quiz created successfully!')) {
-        const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
-        navigate(quizLink);
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (isLoading || !newMessage.trim()) return;
+  
+      setIsLoading(true);
+  
+      try {
+        const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
+          content: newMessage,
+        });
+        setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
+        setNewMessage('');
+  
+        if (response.data.content.includes('Quiz created successfully!')) {
+          const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
+          navigate(quizLink);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
-
   const handleNewConversation = async (e) => {
     e.preventDefault();
     if (!newConversationTitle.trim() || !newConversationLanguage) return;
@@ -212,12 +213,13 @@ function Chat() {
                     <Form.Control
                       as="textarea"
                       rows={3}
-                      placeholder="Type your message..."
+                      placeholder="Type your message (Enter to send, Shift+Enter for new line)..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleSendMessage}
                       required
-                    />
-                  </Form.Group>
+                    />                  
+                    </Form.Group>
                   <Button variant="primary" type="submit" disabled={isLoading} className="mt-3">
                     {isLoading ? 'Sending...' : 'Send'}
                   </Button>
