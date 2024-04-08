@@ -22,7 +22,6 @@ def traverse_folder(folder_path, combined_content):
     # Loop through all files and folders in the current folder
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
-        
         # If the item is a folder, recursively traverse it
         if os.path.isdir(item_path) and not item.startswith("node_modules") and not item.startswith('migrations') and not item.startswith('.'):
             combined_content = traverse_folder(item_path, combined_content)
@@ -35,11 +34,11 @@ def traverse_folder(folder_path, combined_content):
     return combined_content
 
 # Get the folder path from the user
-folder_path = "."
+folder_path = "/workspaces/aiLingo/backend/"
 
 # Initialize an empty string to store the combined contents
 combined_content = ""
-output_file_path = "test.txt"
+output_file_path = "/workspaces/aiLingo/backend/test.txt"
 
 # Traverse the folder and subfolders
 combined_content = traverse_folder(folder_path, combined_content)
