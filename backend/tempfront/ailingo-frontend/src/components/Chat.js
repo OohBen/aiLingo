@@ -64,16 +64,16 @@ function Chat() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (isLoading || !newMessage.trim()) return;
-  
+
       setIsLoading(true);
-  
+
       try {
         const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
           content: newMessage,
         });
         setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
         setNewMessage('');
-  
+
         if (response.data.content.includes('Quiz created successfully!')) {
           const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
           navigate(quizLink);
@@ -85,6 +85,7 @@ function Chat() {
       }
     }
   };
+
   const handleNewConversation = async (e) => {
     e.preventDefault();
     if (!newConversationTitle.trim() || !newConversationLanguage) return;
@@ -109,35 +110,25 @@ function Chat() {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
-
-  const renderMarkdown = (content) => {
-    const quizDataRegex = /(?:^|\n)___quiz!!!___\n([\s\S]*?)(?=\n___quiz!!!___|\n*$)/g;
-    const quizData = [];
-
-    let match;
-    while ((match = quizDataRegex.exec(content)) !== null) {
-      quizData.push(match[1]);
+  const renderMarkdown = (message) => {
+    if (message.content.includes('Quiz created successfully!')) {
+        const quizLink = message.content.match(/(\/quizzes\/\d+)/)[0];
+        return (
+            <div className="quiz-creation-message">
+                A new quiz has been created! <br />
+                <a href={quizLink}>Start the quiz</a>
+            </div>
+        );
+    } else {
+        return <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>;
     }
+}
 
-    const formattedContent = content.replace(quizDataRegex, '');
-
-    return (
-      <>
-        <Markdown remarkPlugins={[remarkGfm]}>{formattedContent}</Markdown>
-        {quizData.map((data, index) => (
-          <div key={index} className="quiz-container">
-            <h4>Quiz</h4>
-            <pre>{data}</pre>
-          </div>
-        ))}
-      </>
-    );
-  };
 
   return (
     <Container fluid className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       <Row>
-        <Col md={4}>
+        <Col md={4} className="sidebar-scroll">
           <Card className={`conversations-card ${darkMode ? 'dark-mode' : ''}`}>
             <Card.Header>
               <h4>Conversations</h4>
@@ -199,10 +190,9 @@ function Chat() {
                   {messages.map((message, index) => (
                     <div
                       key={index}
-                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}
-                    >
+                      className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}>
                       <strong>{message.sender === 'user' ? 'You' : 'AI Teacher'}:</strong>
-                      <div className="message-content">{renderMarkdown(message.content)}</div>
+                      <div className="message-content">{renderMarkdown(message)}</div>
                     </div>
                   ))}
                   <div ref={messagesEndRef} />
@@ -218,20 +208,19 @@ function Chat() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={handleSendMessage}
                       required
-                    />                  
-                    </Form.Group>
+                    />
+                  </Form.Group>
                   <Button variant="primary" type="submit" disabled={isLoading} className="mt-3">
                     {isLoading ? 'Sending...' : 'Send'}
                   </Button>
                 </Form>
               </Card.Body>
             </Card>
-          ) : (
-            <Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
-              <Card.Body>
-                <h4>Select a conversation to start chatting.</h4>
-              </Card.Body>
-            </Card>
+          ) : (<Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
+            <Card.Body>
+              <h4>Select a conversation to start chatting.</h4>
+            </Card.Body>
+          </Card>
           )}
         </Col>
       </Row>
@@ -243,3 +232,4 @@ function Chat() {
 }
 
 export default Chat;
+

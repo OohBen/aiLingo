@@ -244,9 +244,18 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     serializer = QuestionSerializer(data=question_data)
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
-                
-                bot_response += f"\n\nQuiz created successfully! You can access the quiz here: [Take Quiz](/quizzes/{quiz.id})"
 
+                # New: Generate a user-friendly response for quiz creation
+                friendly_response = f"Your quiz titled '{quiz.title}' with {len(questions_data)} questions has been successfully created. You can start it anytime from the quizzes section."
+
+                # Append the user-friendly message to the bot response
+                bot_response = friendly_response
+
+        else:
+            # If no quiz was created, use the original bot response
+            bot_response = response.replace("\n", "\\n")
+
+        # Logic to save the bot's response and return it
         bot_message_serializer = MessageSerializer(
             data={
                 "conversation": conversation_id,
@@ -257,8 +266,5 @@ class MessageListCreateView(generics.ListCreateAPIView):
         bot_message_serializer.is_valid(raise_exception=True)
         bot_message_serializer.save()
 
-        topic_scores = self.extract_topic_scores(topics)
-        user_analytics, _ = UserAnalytics.objects.get_or_create(user=request.user)
-        user_analytics.update_chat_analytics(conversation.language, len(user_message), topic_scores)
         return Response(bot_message_serializer.data, status=status.HTTP_201_CREATED)
- 
+    

@@ -129,3 +129,20 @@ body {
   color: var(--light-color);
   transform: translateX(5px);
 }
+.quiz-creation-message {
+  background-color: var(--light-color);
+  border-left: 4px solid var(--primary-color);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.quiz-creation-message a {
+  color: var(--primary-color);
+  font-weight: bold;
+  text-decoration: underline;
+}
+.sidebar-scroll {
+  max-height: 90vh; /* Adjust based on your layout */
+  overflow-y: auto;
+}
