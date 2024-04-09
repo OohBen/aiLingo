@@ -34,11 +34,11 @@ def traverse_folder(folder_path, combined_content):
     return combined_content
 
 # Get the folder path from the user
-folder_path = "/workspaces/aiLingo/backend/"
+folder_path = "."
 
 # Initialize an empty string to store the combined contents
 combined_content = ""
-output_file_path = "/workspaces/aiLingo/backend/test.txt"
+output_file_path = "codebase.txt"
 
 # Traverse the folder and subfolders
 combined_content = traverse_folder(folder_path, combined_content)

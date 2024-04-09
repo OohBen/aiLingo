@@ -1,0 +1,154 @@
+.
+├── aiLingo
+│   ├── Procfile
+│   ├── aiLingo
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── analytics
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── chat
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── languages
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── lessons
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── manage.py
+│   ├── quizzes
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── railway.json
+│   ├── requirements.txt
+│   └── users
+│       ├── __init__.py
+│       ├── admin.py
+│       ├── apps.py
+│       ├── models.py
+│       ├── serializers.py
+│       ├── tests.py
+│       ├── urls.py
+│       └── views.py
+├── proposal.txt
+├── run.ps1
+├── run.sh
+├── struc.txt
+├── tempfront
+│   └── ailingo-frontend
+│       ├── README.md
+│       ├── package-lock.json
+│       ├── package.json
+│       ├── public
+│       │   ├── favicon.ico
+│       │   ├── index.html
+│       │   ├── logo192.png
+│       │   ├── logo512.png
+│       │   ├── manifest.json
+│       │   └── robots.txt
+│       └── src
+│           ├── App.css
+│           ├── App.js
+│           ├── App.test.js
+│           ├── components
+│           │   ├── Analytics.js
+│           │   ├── AnalyticsDashboard.js
+│           │   ├── Chat.js
+│           │   ├── ConversationPage.js
+│           │   ├── CreateQuiz.js
+│           │   ├── Dashboard.js
+│           │   ├── GenerateQuestion.js
+│           │   ├── Home.js
+│           │   ├── Languages.js
+│           │   ├── Lessons.js
+│           │   ├── Login.js
+│           │   ├── Navigation.js
+│           │   ├── PrivateRoute.js
+│           │   ├── Profile.js
+│           │   ├── QuizAttempt.js
+│           │   ├── QuizDetails.js
+│           │   ├── Quizzes.js
+│           │   ├── Register.js
+│           │   └── contexts
+│           │       └── AuthContext.js
+│           ├── index.css
+│           ├── index.js
+│           ├── logo.svg
+│           ├── reportWebVitals.js
+│           ├── setupTests.js
+│           ├── styles
+│           │   └── global.css
+│           └── utils
+│               ├── auth.js
+│               └── axiosInstance.js
+├── tempfront.zip
+├── test
+│   ├── api
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── authentication.py
+│   │   ├── mixins.py
+│   │   ├── models.py
+│   │   ├── permissions.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── cfehome
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── routers.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── example.py
+│   ├── manage.py
+│   ├── products
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   ├── views.py
+│   │   └── viewsets.py
+│   └── requirments.txt
+├── test.py
+└── test.txt
+
+20 directories, 131 files
