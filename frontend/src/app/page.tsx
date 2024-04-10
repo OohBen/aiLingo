@@ -28,7 +28,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between w-full h-full bg-cover bg-center relative">
+      <div className="bg-black flex items-center justify-between w-full h-full bg-cover bg-center relative">
         <div
           className="pl-20 md:pl-40 pb-56 md:pb-20 flex gap-5 z-[10] max-w-[750px]"
           style={{ opacity: 0.9 }}
