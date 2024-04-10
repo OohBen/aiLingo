@@ -6,7 +6,7 @@ const Signup = () => {
     <div>
       <Navbar />
       <div className="flex-grow flex items-center justify-center">
-        <div className="mt-8 bg-[#212121] p-8 rounded shadow-md w-96">
+        <div className="mt-8 bg-[#000000] p-8 rounded shadow-md w-96 border-2 border-blue-900">
           <h1 className="text-2xl text-center mt-4 mb-6">Sign Up</h1>{" "}
           {/* Added margin bottom to the heading */}
           <form>

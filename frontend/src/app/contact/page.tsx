@@ -8,7 +8,7 @@ const Contact = () => {
     <main>
       <Navbar />
       <div className="w-screen h-screen bg-cover bg-center flex items-center justify-center">
-        <div className="h-[60%] w-[80%] relative bg-cover bg-center rounded-xl border border-blue-900">
+        <div className="h-[60%] w-[80%] relative bg-cover bg-center rounded-xl border border-blue-900  bg-[#000000]">
           <div className="absolute left-20 bottom-10 w-[70%] md:w-[30%]">
             <ContactForm />
           </div>
