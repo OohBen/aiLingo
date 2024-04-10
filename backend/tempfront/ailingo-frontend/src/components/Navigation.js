@@ -1,14 +1,19 @@
+// src/components/Navigation.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { useAuth } from './contexts/AuthContext';
 
 function Navigation({ darkMode, toggleDarkMode }) {
-    const { loggedIn, logout } = useAuth();
+  const { loggedIn, logout } = useAuth();
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    logout();
+    navigate('/'); // Redirect to the home page after logout
+  };
 
-  
-    return (
+  return (
     <Navbar bg={darkMode ? 'dark' : 'light'} variant={darkMode ? 'dark' : 'light'} expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
@@ -30,6 +35,17 @@ function Navigation({ darkMode, toggleDarkMode }) {
                 </Nav.Link>
               </>
             )}
+            {loggedIn && (
+              <>
+                <Nav.Link as={Link} to="/dashboard">
+                  Dashboard
+                </Nav.Link>
+                <Nav.Link as={Link} to="/profile">
+                  Profile
+                </Nav.Link>
+                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+              </>
+            )}
             <Nav.Link as={Link} to="/languages">
               Languages
             </Nav.Link>
@@ -39,22 +55,17 @@ function Navigation({ darkMode, toggleDarkMode }) {
             <Nav.Link as={Link} to="/quizzes">
               Quizzes
             </Nav.Link>
-            {loggedIn && ( 
+            {loggedIn && (
               <Nav.Link as={Link} to="/create-quiz">
                 Create Quiz
               </Nav.Link>
             )}
             {loggedIn && (
-              <Nav.Link as={Link} to="/profile">
-                Profile
-              </Nav.Link>
-            )}
-              {loggedIn && (
               <Nav.Link as={Link} to="/chat">
                 Chat
               </Nav.Link>
             )}
-              {loggedIn && (
+            {loggedIn && (
               <Nav.Link as={Link} to="/analytics">
                 Analytics
               </Nav.Link>
@@ -66,7 +77,7 @@ function Navigation({ darkMode, toggleDarkMode }) {
         {darkMode ? 'Light Mode' : 'Dark Mode'}
       </Button>
     </Navbar>
-);
+  );
 }
 
 export default Navigation;

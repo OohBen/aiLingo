@@ -70,6 +70,14 @@ class ProfileView(APIView):
         data = serializer.data
         data["is_superuser"] = user.is_superuser
         return Response(data)
+    def patch(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class RefreshTokenView(APIView):

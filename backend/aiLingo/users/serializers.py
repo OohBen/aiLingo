@@ -4,6 +4,8 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -15,6 +17,11 @@ class UserSerializer(serializers.ModelSerializer):
             "is_premium",
             "home_language",
         ]
+
+    def get_profile_pic(self, obj):
+        if obj.profile_pic:
+            return self.context.get('request').build_absolute_uri(obj.profile_pic.url)
+        return None
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

@@ -8,7 +8,7 @@ export const loginUser = async (email, password) => {
     const response = await axios.post(`${BASE_URL}/users/login/`, { email, password });
     localStorage.setItem('access_token', response.data.access);
     localStorage.setItem('refresh_token', response.data.refresh);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user object
     return response.data;
   } catch (error) {
     throw error.response.data;
