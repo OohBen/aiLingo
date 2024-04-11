@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -110,17 +110,17 @@ function Chat() {
   };
   const renderMarkdown = (message) => {
     if (message.content.includes('Quiz created successfully!')) {
-        const quizLink = message.content.match(/(\/quizzes\/\d+)/)[0];
-        return (
-            <div className="quiz-creation-message">
-                A new quiz has been created! <br />
-                <a href={quizLink}>Start the quiz</a>
-            </div>
-        );
+      const quizLink = message.content.match(/(\/quizzes\/\d+)/)[0];
+      return (
+        <div className="quiz-creation-message">
+          A new quiz has been created! <br />
+          <Link to={quizLink}>Start the quiz</Link>
+        </div>
+      );
     } else {
-        return <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>;
+      return <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>;
     }
-}
+  };
 
 
   return (
