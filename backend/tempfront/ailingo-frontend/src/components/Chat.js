@@ -61,28 +61,26 @@ function Chat() {
   };
 
   const handleSendMessage = async (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (isLoading || !newMessage.trim()) return;
-
-      setIsLoading(true);
-
-      try {
-        const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
-          content: newMessage,
-        });
-        setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
-        setNewMessage('');
-
-        if (response.data.content.includes('Quiz created successfully!')) {
-          const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
-          navigate(quizLink);
-        }
-      } catch (error) {
-        console.error('Error sending message:', error);
-      } finally {
-        setIsLoading(false);
+    e.preventDefault(); // Add this line to prevent form submission
+    if (isLoading || !newMessage.trim()) return;
+  
+    setIsLoading(true);
+  
+    try {
+      const response = await axiosInstance.post(`/chat/conversations/${selectedConversation.id}/messages/`, {
+        content: newMessage,
+      });
+      setMessages([...messages, { sender: 'user', content: newMessage }, response.data]);
+      setNewMessage('');
+  
+      if (response.data.content.includes('Quiz created successfully!')) {
+        const quizLink = response.data.content.match(/\/quizzes\/\d+/)[0];
+        navigate(quizLink);
       }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -198,23 +196,21 @@ function Chat() {
                   <div ref={messagesEndRef} />
                 </div>
                 <Form onSubmit={handleSendMessage}>
-                  <Form.Group controlId="newMessage">
-                    <Form.Label>Message</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      placeholder="Type your message (Enter to send, Shift+Enter for new line)..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleSendMessage}
-                      required
-                    />
-                  </Form.Group>
-                  <Button variant="primary" type="submit" disabled={isLoading} className="mt-3">
-                    {isLoading ? 'Sending...' : 'Send'}
-                  </Button>
-                </Form>
-              </Card.Body>
+  <Form.Group controlId="newMessage">
+    <Form.Label>Message</Form.Label>
+    <Form.Control
+      as="textarea"
+      rows={3}
+      placeholder="Type your message (Enter to send, Shift+Enter for new line)..."
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      required
+    />
+  </Form.Group>
+  <Button variant="primary" type="submit" disabled={isLoading} className="mt-3">
+    {isLoading ? 'Sending...' : 'Send'}
+  </Button>
+</Form>              </Card.Body>
             </Card>
           ) : (<Card className={`chat-card ${darkMode ? 'dark-mode' : ''}`}>
             <Card.Body>

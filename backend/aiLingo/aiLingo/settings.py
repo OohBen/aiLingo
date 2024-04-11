@@ -86,7 +86,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "aiLingo.wsgi.application"
 
-CORS_ORIGIN_WHITELIST = ['https://ailingo-temp.vercel.app','http://localhost:3000', 'http://127.0.0.1:3000']
+CORS_ORIGIN_WHITELIST = ['https://glowing-palm-tree-xqp96ggp7xg264gw-3000.app.github.dev','https://ailingo-temp.vercel.app','http://localhost:3000', 'http://127.0.0.1:3000']
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
