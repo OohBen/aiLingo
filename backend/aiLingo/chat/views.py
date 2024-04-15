@@ -219,6 +219,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
             f"User: {user_message}",
             "AI Teacher:",
         ]
+        print(user_message)
 
         prompt = "\n".join(prompt_parts)
 

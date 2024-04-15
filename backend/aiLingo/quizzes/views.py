@@ -109,6 +109,8 @@ class CreateQuizView(generics.CreateAPIView):
             elif line.startswith("c"):
                 question_data["choices"].append(line.split(":")[1].strip())
             elif line.startswith("e"):
+                if not question_data.get("explanations"):
+                    question_data["explanations"] = []
                 question_data["explanations"].append(line.split(":")[1].strip())
             elif line.startswith("a:"):
                 question_data["answer"] = int(line.split(":")[1].strip())
@@ -157,12 +159,12 @@ class QuizAttemptView(generics.CreateAPIView):
         user = request.user
 
         total_score = 0
-        max_score = 0
+        max_score = sum(question.worth for question in quiz.question_set.all())
 
-        for question_id, user_answer in user_answers.items():
-            question = Question.objects.get(id=question_id)
-            max_score += question.worth
-            if question.answer == user_answer:
+
+        for question in quiz.question_set.all():
+            user_answer = user_answers.get(str(question.id))
+            if user_answer == question.answer:
                 total_score += question.worth
 
         score = (total_score / max_score) * 100

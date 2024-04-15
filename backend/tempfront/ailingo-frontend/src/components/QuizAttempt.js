@@ -70,9 +70,7 @@ function QuizAttempt() {
               {question.choices.map((choice, index) => (
                 <li
                   key={index}
-                  className={`choice ${
-                    userAnswers[question.id] === index + 1 ? 'selected' : ''
-                  }`}
+                  className={`choice ${userAnswers[question.id] === index + 1 ? 'selected' : ''}`}
                   onClick={() => handleAnswerSelect(question.id, index + 1)}
                 >
                   {choice}
@@ -88,13 +86,41 @@ function QuizAttempt() {
         </button>
       ) : (
         <div>
-          <h3>Score: {score}%</h3>
+          <h3>Quiz Results</h3>
+          <p>Your Score: {score}%</p>
+          <h4>Correct Answers:</h4>
+          <ul>
+            {questions.map((question) => (
+              <li key={question.id}>
+                <strong>{question.text}</strong>
+                <br />
+                Correct Answer: {question.choices[question.answer - 1]}
+                <br />
+                Your Answer: {userAnswers[question.id] ? question.choices[userAnswers[question.id] - 1] : 'Not answered'}
+                <br />
+                {question.explanations && question.explanations[question.answer - 1] && (
+                  <>
+                    Explanation: {question.explanations[question.answer - 1]}
+                  </>
+                )}
+                <br />
+                Question Worth: {question.worth} points
+              </li>
+            ))}
+          </ul>
+          <h4>Score Breakdown:</h4>
+          <ul>
+            {questions.map((question) => (
+              <li key={question.id}>
+                {question.text}: {userAnswers[question.id] === question.answer ? question.worth : 0} points
+              </li>
+            ))}
+          </ul>
+          <p>Total Points: {questions.reduce((total, question) => total + (userAnswers[question.id] === question.answer ? question.worth : 0), 0)} out of {questions.reduce((total, question) => total + question.worth, 0)}</p>
           <button onClick={() => navigate('/analytics')}>View Analytics</button>
         </div>
       )}
     </div>
-  );
-}
-
+  )};
 
 export default QuizAttempt;
