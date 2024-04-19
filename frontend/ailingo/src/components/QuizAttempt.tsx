@@ -59,6 +59,12 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
       console.error('Failed to submit quiz attempt:', error);
     }
   };
+  const handleReset = () => {
+    setCurrentQuestion(0);
+    setSelectedAnswers({});
+    setScore(0);
+    setShowResult(false);
+  };
 
   if (showResult) {
     return (

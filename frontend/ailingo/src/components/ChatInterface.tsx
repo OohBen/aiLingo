@@ -112,6 +112,8 @@ export function ChatInterface() {
     }
   };
 
+
+
   return (
     <div className="flex">
       <div className="w-1/4 bg-gray-200 p-4">
