@@ -1,8 +1,10 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,46 +15,64 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-      callbackUrl: '/dashboard',
-    });
+    try {
+      const response = await axios.post(`${API_BASE_URL}/users/login/`, {
+        email,
+        password,
+      });
 
-    if (result?.error) {
-      setError(result.error);
-    } else {
-      router.push('/dashboard');
+      const { refresh, access, user } = response.data;
+
+      if (access) {
+        localStorage.setItem('refresh_token', refresh);
+        localStorage.setItem('access_token', access);
+        localStorage.setItem('user', JSON.stringify(user));
+        router.push('/dashboard');
+      } else {
+        setError('Invalid email or password');
+      }
+    } catch (error) {
+      setError('An error occurred during login');
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Login</h1>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email" className="block mb-1">
+            Email
+          </label>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password" className="block mb-1">
+            Password
+          </label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
-        <button type="submit">Login</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Login
+        </button>
       </form>
     </div>
   );

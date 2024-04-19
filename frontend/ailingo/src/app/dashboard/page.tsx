@@ -1,21 +1,30 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/auth';
-import { getUserDetails } from '../../lib/api';
+'use client';
 
-export default async function Dashboard() {
-  const session = await getServerSession(authOptions);
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-  if (!session) {
-    return <div>Access Denied</div>;
+export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      router.push('/login');
+    }
+  }, []);
+
+  if (!user) {
+    return <div>Loading...</div>;
   }
-
-  const user = await getUserDetails(session.user.email);
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       <p>Welcome, {user.name}!</p>
-      {/* Add more dashboard content */}
     </div>
   );
 }
