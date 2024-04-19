@@ -1,63 +1,83 @@
-from flask import Flask, request, jsonify
 import os
-import glob
+from pathlib import Path
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
+BASE_DIR = Path('/home/oohben/aiLingo/backend/')
+WHITELISTED_DIRS = {'tempfront/ailingo-frontend', 'aiLingo'}
+IGNORED_DIRS = {'node_modules', '__pycache__','.venv'}
 
-# Determine the directory where this script is located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Ensure the path is within the allowed directories
-def is_safe_path(base_path, path, follow_symlinks=True):
-    if follow_symlinks:
-        return os.path.realpath(path).startswith(base_path)
-    return os.path.abspath(path).startswith(base_path)
+def is_within_whitelisted_dirs(file_path: Path):
+    if any(ignored_dir in file_path.parts for ignored_dir in IGNORED_DIRS):
+        return False
+    # Only consider paths within whitelisted directories or their subdirectories
+    return any(str(file_path).startswith(str(BASE_DIR / whitelisted)) for whitelisted in WHITELISTED_DIRS)
 
 @app.route('/files/create', methods=['POST'])
 def create_file():
-    path = os.path.join(BASE_DIR, request.json.get('path'))
-    content = request.json.get('content', '')
-    if is_safe_path(BASE_DIR, path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'w') as file:
-            file.write(content)
-        return jsonify({"message": "File created successfully."}), 200
-    return jsonify({"error": "Invalid file path."}), 400
+    data = request.json
+    file_path = BASE_DIR.joinpath(data.get('path', '')).resolve()
+    if not is_within_whitelisted_dirs(file_path):
+        return jsonify({"error": "Operation not allowed"}), 403
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(data.get('content', ''))
+    return jsonify({"message": "File created successfully"}), 201
 
-@app.route('/files/delete', methods=['POST'])
+@app.route('/files/delete', methods=['DELETE'])
 def delete_file():
-    path = os.path.join(BASE_DIR, request.json.get('path'))
-    if is_safe_path(BASE_DIR, path) and os.path.exists(path):
-        os.remove(path)
-        return jsonify({"message": "File deleted successfully."}), 200
-    return jsonify({"error": "File not found or invalid path."}), 404
-
-@app.route('/files/update', methods=['POST'])
-def update_file():
-    path = os.path.join(BASE_DIR, request.json.get('path'))
-    content = request.json.get('content')
-    if is_safe_path(BASE_DIR, path) and os.path.exists(path):
-        with open(path, 'w') as file:
-            file.write(content)
-        return jsonify({"message": "File updated successfully."}), 200
-    return jsonify({"error": "File not found or invalid path."}), 404
+    file_path = BASE_DIR.joinpath(request.args.get('path', '')).resolve()
+    if not is_within_whitelisted_dirs(file_path):
+        return jsonify({"error": "Operation not allowed"}), 403
+    if file_path.exists():
+        file_path.unlink()
+        return jsonify({"message": "File deleted successfully"}), 200
+    return jsonify({"error": "File not found"}), 404
 
 @app.route('/directory/structure', methods=['GET'])
-def get_directory_structure():
-    sub_path = request.args.get('path', '')
-    path = os.path.join(BASE_DIR, sub_path)
-    if is_safe_path(BASE_DIR, path):
-        files = glob.glob(path + '/**', recursive=True)
-        return jsonify({"files": files}), 200
-    return jsonify({"error": "Invalid path."}), 400
+def directory_structure():
+    structure = {"directories": [], "files": []}
+    for whitelisted_dir in WHITELISTED_DIRS:
+        dir_path = BASE_DIR / whitelisted_dir
+        if dir_path.exists():
+            for item in dir_path.rglob('*'):
+                if item.is_dir() and is_within_whitelisted_dirs(item):
+                    structure["directories"].append(str(item.relative_to(BASE_DIR)))
+                elif item.is_file() and is_within_whitelisted_dirs(item):
+                    structure["files"].append(str(item.relative_to(BASE_DIR)))
+    
+    return jsonify(structure), 200
 
-@app.route('/directory/readall', methods=['GET'])
-def read_all_from_directory():
-    sub_path = request.args.get('path', '')
-    path = os.path.join(BASE_DIR, sub_path)
-    if is_safe_path(BASE_DIR, path):
-        all_files_content = {}
-        for filename in glob.iglob(path + '/**/*', recursive=True):
-            if os.path.isfile(filename):
-                with open(filename, 'r') as file:
-                    all_files_content[filename.replace(BASE
+@app.route('/directory/data', methods=['GET'])
+def directory_data():
+    data = {}
+    for whitelisted_dir in WHITELISTED_DIRS:
+        dir_path = BASE_DIR / whitelisted_dir
+        if dir_path.exists():
+            for item in dir_path.rglob('*'):
+                if item.is_file() and is_within_whitelisted_dirs(item):
+                    try:
+                        data[str(item.relative_to(BASE_DIR))] = item.read_text()
+                    except UnicodeDecodeError:
+                        data[str(item.relative_to(BASE_DIR))] = "Error: Could not decode file content."
+    
+    return jsonify(data), 200
+
+@app.route('/file', methods=['GET'])
+def get_file():
+    print(request.args)
+    file_path = BASE_DIR.joinpath(request.args.get('path', '')).resolve()
+    print(file_path)
+    if not is_within_whitelisted_dirs(file_path):
+        return jsonify({"error": "Access denied"}), 403
+    if file_path.is_file():
+        return jsonify({"content": file_path.read_text()}), 200
+    return jsonify({"error": "File not found"}), 404
+
+@app.route('/whitelisted-dirs', methods=['GET'])
+def get_whitelisted_dirs():
+    # Returns the list of whitelisted directories within the BASE_DIR
+    dirs = {d for d in WHITELISTED_DIRS if (BASE_DIR / d).exists()}
+    return jsonify(list(dirs)), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -25,7 +25,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
 
-    def parse_quiz_data(self, text: str):
+    def parse_quiz_data(self, text):
         quiz_data = {}
         lines = text[text.find("___quiz!!!___"):].strip().split("\n")
 
@@ -50,13 +50,16 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     question_data["explanations"] = []
                 question_data["explanations"].append(line.split("e")[1].strip())
             elif line.startswith("a:"):
-                question_data["answer"] = int(line.split("a:")[1].strip())
+                answer_value = line.split("a:")[1].strip()
+                if answer_value.isdigit():
+                    question_data["answer"] = int(answer_value)
+                else:
+                    question_data["answer"] = None
             elif line.startswith("w:"):
                 question_data["worth"] = int(line.split("w:")[1].strip())
                 quiz_data["questions"].append(question_data)
 
-        return quiz_data if "title" in quiz_data and "duration" in quiz_data and "passing_score" in quiz_data and "questions" in quiz_data else None
-    
+        return quiz_data if "title" in quiz_data and "duration" in quiz_data and "passing_score" in quiz_data and "questions" in quiz_data else None    
     def extract_topic_scores(self, text):
         print(text)
         topic_scores = json.loads(text.strip().replace("'", "\""))
@@ -219,8 +222,6 @@ class MessageListCreateView(generics.ListCreateAPIView):
             f"User: {user_message}",
             "AI Teacher:",
         ]
-        print(user_message)
-
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
@@ -246,14 +247,11 @@ class MessageListCreateView(generics.ListCreateAPIView):
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
 
-                # New: Generate a user-friendly response for quiz creation
-                friendly_response = f"Your quiz titled '{quiz.title}' with {len(questions_data)} questions has been successfully created. You can start it anytime from the quizzes section."
-
-                # Append the user-friendly message to the bot response
-                bot_response = friendly_response
-
+                # Generate a user-friendly response for quiz creation
+                bot_response = f"Quiz created successfully! You can start the quiz at /quizzes/{quiz.id}/"
+            else:
+                bot_response = "Failed to create quiz. Please try again with the correct format."
         else:
-            # If no quiz was created, use the original bot response
             bot_response = response.replace("\n", "\\n")
 
         # Logic to save the bot's response and return it

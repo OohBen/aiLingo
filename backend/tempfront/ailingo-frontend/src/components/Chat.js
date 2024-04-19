@@ -114,11 +114,12 @@ function Chat() {
       return (
         <div className="quiz-creation-message">
           A new quiz has been created! <br />
-          <Link to={quizLink}>Start the quiz</Link>
+          <a href={quizLink}>Start the quiz</a>
         </div>
       );
     } else {
-      return <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>;
+      const content = message.content.replace(/\\n/g, '\n');
+      return <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>;
     }
   };
 

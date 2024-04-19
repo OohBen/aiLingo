@@ -60,7 +60,7 @@ class CreateQuizView(generics.CreateAPIView):
         "output: Quiz Title: Präpositionen\nDuration: 12\nPassing Score: 80\nq: Which preposition correctly completes the sentence \"Ich gehe _____ Hause\" (I'm going home)?\nc1: zu\ne1: Correct! \"Zu\" is used to indicate movement towards a destination, such as \"to\" or \"towards\" in English.\nc2: auf\ne2: \"Auf\" means \"on\" or \"onto\" in English, usually referring to a surface or a direction upwards.\nc3: in\ne3: \"In\" is used to indicate location inside something, such as \"in\" or \"into\" in English.\nc4: an\ne4: \"An\" is used to indicate proximity or contact, such as \"at,\" \"on,\" or \"by\" in English.\na: 1\nw: 3\nq: Choose the correct preposition for the sentence \"Das Buch liegt _____ dem Tisch\" (The book is lying on the table).\nc1: in\ne1: \"In\" is used to indicate location inside something, such as \"in\" or \"into\" in English.\nc2: an\ne2: \"An\" is used to indicate proximity or contact, such as \"at,\" \"on,\" or \"by\" in English.\nc3: auf\ne3: Correct! \"Auf\" means \"on\" or \"onto\" in English, usually referring to a surface or a direction upwards.\nc4: über\ne4: \"Über\" means \"over\" or \"above\" in English, indicating a higher position without contact.\na: 3\nw: 3\nq: Which preposition is used in the sentence \"Ich komme _____ Berlin\" (I come from Berlin)?\nc1: aus\ne1: Correct! \"Aus\" is used to indicate origin or source, such as \"from\" or \"out of\" in English.\nc2: von\ne2: \"Von\" also means \"from\" in English but is used differently than \"aus,\" often with people or in abstract contexts.\nc3: bei\ne3: \"Bei\" means \"at,\" \"near,\" or \"with\" in English, often referring to people or locations.\nc4: nach\ne4: \"Nach\" means \"to\" or \"towards\" in English, indicating direction or destination.\na: 1\nw: 3\nq: Complete the sentence with the correct preposition: \"Er wartet _____ seine Freundin\" (He is waiting for his girlfriend).\nc1: für\ne1: \"Für\" means \"for\" in English, but it is used to indicate purpose, benefit, or a recipient.\nc2: um\ne2: \"Um\" means \"around\" or \"at\" in English, often referring to time or location.\nc3: auf\ne3: Correct! \"Auf\" is used with the verb \"warten\" (to wait) to mean \"for\" in English.\nc4: zu\ne4: \"Zu\" is used to indicate movement towards a destination, such as \"to\" or \"towards\" in English.\na: 3\nw: 3\nq: Choose the correct preposition for the sentence \"Wir fahren _____ den Urlaub\" (We are going on vacation).\nc1: in\ne1: Correct! \"In\" is used with the accusative case to indicate a destination or a period of time, such as \"on\" vacation.\nc2: an\ne2: \"An\" is used to indicate proximity or contact, such as \"at,\" \"on,\" or \"by\" in English.\nc3: auf\ne3: \"Auf\" means \"on\" or \"onto\" in English, usually referring to a surface or a direction upwards.\nc4: zu\ne4: \"Zu\" is used to indicate movement towards a destination, such as \"to\" or \"towards\" in English.\na: 1\nw: 3",
         "input: Generate a quiz titled \"Cooking Vocabulary\" for Italian speakers learning English",
         "output: Quiz Title: Cooking Vocabulary\nDuration: 10\nPassing Score: 80\nq: What is the English word for \"friggere\" (to fry)?\nc1: Boil\ne1: \"Boil\" significa \"bollire\" in italiano, non \"friggere\".\nc2: Bake\ne2: \"Bake\" significa \"cuocere al forno\" in italiano, non \"friggere\".\nc3: Fry\ne3: Correct! \"Fry\" significa \"friggere\" in italiano.\nc4: Grill\ne4: \"Grill\" significa \"grigliare\" in italiano, non \"friggere\".\na: 3\nw: 2\nq: How do you say \"mescolare\" (to stir) in English?\nc1: Mix\ne1: \"Mix\" significa \"miscelare\" o \"mescolare\" in italiano, ma è meno specifico di \"stir\".\nc2: Blend\ne2: \"Blend\" significa \"frullare\" o \"mescolare\" in italiano, di solito riferendosi a ingredienti liquidi o morbidi.\nc3: Stir\ne3: Correct! \"Stir\" significa \"mescolare\" in italiano.\nc4: Beat\ne4: \"Beat\" significa \"sbattere\" in italiano, non \"mescolare\".\na: 3\nw: 2\nq: What is the English translation for \"pentola\" (pot)?\nc1: Pan\ne1: \"Pan\" significa \"padella\" o \"tegame\" in italiano, non \"pentola\".\nc2: Pot\ne2: Correct! \"Pot\" significa \"pentola\" in italiano.\nc3: Kettle\ne3: \"Kettle\" significa \"bollitore\" in italiano, utilizzato per riscaldare l'acqua, non per cucinare.\nc4: Bowl\ne4: \"Bowl\" significa \"ciotola\" in italiano, non \"pentola\".\na: 2\nw: 3\nq: Translate \"affettare\" (to slice) to English.\nc1: Cut\ne1: \"Cut\" significa \"tagliare\" in italiano, che è più generico di \"affettare\".\nc2: Chop\ne2: \"Chop\" significa \"tritare\" o \"sminuzzare\" in italiano, non \"affettare\".\nc3: Slice\ne3: Correct! \"Slice\" significa \"affettare\" in italiano.\nc4: Dice\ne4: \"Dice\" significa \"tagliare a dadini\" in italiano, non \"affettare\".\na: 3\nw: 2\nq: How would you say \"grattugiare\" (to grate) in English?\nc1: Grind\ne1: \"Grind\" significa \"macinare\" in italiano, non \"grattugiare\".\nc2: Shred\ne2: \"Shred\" significa \"sminuzzare\" o \"grattugiare\" in italiano, ma di solito si riferisce a ingredienti come il formaggio o il cavolo.\nc3: Mince\ne3: \"Mince\" significa \"tritare finemente\" in italiano, non \"grattugiare\".\nc4: Grate\ne4: Correct! \"Grate\" significa \"grattugiare\" in italiano.\na: 4\nw: 2",
-        f"input: Generate a quiz titled \"{request.data['title']}\" for {home_language} speakers learning {request.data['language']}.",
+        f"input: Generate a quiz titled \"{request.data['title']}\" for {home_language} speakers learning {request.data['language']}. Passing score must be an integer not a percent, same with the time just an integer amount of minutes follow the examples given exactly in that format",
         "output: ",
         ]
 
@@ -101,16 +101,18 @@ class CreateQuizView(generics.CreateAPIView):
             elif line.startswith("Duration:"):
                 duration = int(line.split(":")[1].strip())
             elif line.startswith("Passing Score:"):
-                passing_score = int(line.split(":")[1].strip())
+                passing_score_str = line.split(":")[1].strip()
+                passing_score = int(passing_score_str)
             elif line.startswith("q:"):
                 if question_data:
                     questions_data.append(question_data)
-                question_data = {"text": line.split(":")[1].strip(), "choices": [], "explanations": [], "worth": 1}
+                    question_data = {}
+                question_data["text"] = line.split(":")[1].strip()
+                question_data["choices"] = []
+                question_data["explanations"] = []
             elif line.startswith("c"):
                 question_data["choices"].append(line.split(":")[1].strip())
             elif line.startswith("e"):
-                if not question_data.get("explanations"):
-                    question_data["explanations"] = []
                 question_data["explanations"].append(line.split(":")[1].strip())
             elif line.startswith("a:"):
                 question_data["answer"] = int(line.split(":")[1].strip())
@@ -126,7 +128,6 @@ class CreateQuizView(generics.CreateAPIView):
             "passing_score": passing_score,
             "questions": questions_data,
         }
-        
 class QuizListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Quiz.objects.all()
@@ -159,24 +160,16 @@ class QuizAttemptView(generics.CreateAPIView):
         user = request.user
 
         total_score = 0
-        max_score = sum(question.worth for question in quiz.question_set.all())
-
+        max_score = 0
 
         for question in quiz.question_set.all():
             user_answer = user_answers.get(str(question.id))
-            if user_answer == question.answer:
+            max_score += question.worth
+            if question.answer == user_answer:
                 total_score += question.worth
 
         score = (total_score / max_score) * 100
         attempt = Attempt.objects.create(user=user, quiz=quiz, score=score)
         serializer = self.get_serializer(attempt)
-
-        topic_scores = {}
-        for question in quiz.question_set.all():
-            if question.answer == user_answers.get(str(question.id)):
-                topic_scores[question.text] = question.worth
-
-        user_analytics, _ = UserAnalytics.objects.get_or_create(user=user)
-        user_analytics.update_quiz_analytics(quiz.language, score, topic_scores)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
