@@ -32,9 +32,17 @@ export default function LoginPage() {
         setError('Invalid email or password');
       }
     } catch (error) {
-      setError('An error occurred during login');
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        setError('Session expired. Please login again.');
+      } else {
+        setError('An error occurred during login');
+      }
     }
   };
+
 
   return (
     <div className="max-w-md mx-auto">

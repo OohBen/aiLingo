@@ -1,108 +1,174 @@
 'use client';
 
-import axios, { AxiosError } from 'axios';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createConversation, sendMessage, getConversations, getMessages, getLanguages } from '../lib/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export function ChatInterface() {
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [languages, setLanguages] = useState([]);
+  const [newConversationLanguage, setNewConversationLanguage] = useState('');
+  const [newConversationTitle, setNewConversationTitle] = useState('');
+  const router = useRouter();
 
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
+  useEffect(() => {
+    fetchConversations();
+    fetchLanguages();
+  }, []);
 
-const handleError = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    throw error.response?.data;
-  }
-  throw error;
-};
+  useEffect(() => {
+    if (selectedConversation) {
+      fetchMessages();
+    }
+  }, [selectedConversation]);
 
-export const login = async (email: string, password: string) => {
-  try {
-    const response = await axiosInstance.post('/users/login/', { email, password });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const fetchConversations = async () => {
+    try {
+      const data = await getConversations();
+      setConversations(data);
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error);
+    }
+  };
 
-export const registerUser = async (name: string, email: string, password: string) => {
-  try {
-    const response = await axiosInstance.post('/users/register/', { name, email, password });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const fetchLanguages = async () => {
+    try {
+      const data = await getLanguages();
+      setLanguages(data);
+    } catch (error) {
+      console.error('Failed to fetch languages:', error);
+    }
+  };
 
-export const getUserDetails = async (email: string) => {
-  try {
-    const response = await axiosInstance.get(`/users/profile/`, { params: { email } });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const fetchMessages = async () => {
+    try {
+      const data = await getMessages(selectedConversation.id);
+      setMessages(data);
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
+  };
 
-export const getLanguages = async () => {
-  try {
-    const response = await axiosInstance.get('/languages/');
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const handleConversationClick = (conversation) => {
+    setSelectedConversation(conversation);
+  };
 
-export const getLessons = async () => {
-  try {
-    const response = await axiosInstance.get('/lessons/');
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() !== '') {
+      try {
+        const data = await sendMessage(selectedConversation.id, inputMessage);
+        setMessages([...messages, data]);
+        setInputMessage('');
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
+    }
+  };
 
-export const getQuizzes = async () => {
-  try {
-    const response = await axiosInstance.get('/quizzes/');
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const handleCreateConversation = async () => {
+    if (newConversationLanguage && newConversationTitle) {
+      try {
+        const data = await createConversation(newConversationLanguage, newConversationTitle);
+        setConversations([...conversations, data]);
+        setSelectedConversation(data);
+        setNewConversationLanguage('');
+        setNewConversationTitle('');
+      } catch (error) {
+        console.error('Failed to create conversation:', error);
+      }
+    }
+  };
 
-export const getQuizById = async (id: string) => {
-  try {
-    const response = await axiosInstance.get(`/quizzes/${id}/`);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const createQuiz = async (title: string, description: string) => {
-  try {
-    const response = await axiosInstance.post('/quizzes/', { title, description });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const getUserAnalytics = async (email: string) => {
-  try {
-    const response = await axiosInstance.get(`/analytics/user-analytics/`, { params: { email } });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const sendMessage = async (message: string) => {
-  try {
-    const response = await axiosInstance.post('/chat/', { message });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
+  return (
+    <div className="flex">
+      <div className="w-1/4 bg-gray-200 p-4">
+        <h2 className="text-xl font-semibold mb-4">Conversations</h2>
+        <ul>
+          {conversations.map((conversation) => (
+            <li
+              key={conversation.id}
+              className={`cursor-pointer mb-2 ${
+                selectedConversation?.id === conversation.id ? 'font-bold' : ''
+              }`}
+              onClick={() => handleConversationClick(conversation)}
+            >
+              {conversation.title}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">New Conversation</h3>
+          <select
+            className="block w-full mb-2"
+            value={newConversationLanguage}
+            onChange={(e) => setNewConversationLanguage(e.target.value)}
+          >
+            <option value="">Select Language</option>
+            {languages.map((language) => (
+              <option key={language.id} value={language.id}>
+                {language.name}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="block w-full mb-2"
+            placeholder="Conversation Title"
+            value={newConversationTitle}
+            onChange={(e) => setNewConversationTitle(e.target.value)}
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            onClick={handleCreateConversation}
+          >
+            Create Conversation
+          </button>
+        </div>
+      </div>
+      <div className="w-3/4 bg-white shadow-md rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedConversation?.title || 'Select a conversation'}
+        </h2>
+        <div className="h-64 overflow-y-auto mb-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`mb-2 ${
+                message.sender === 'user' ? 'text-right' : 'text-left'
+              }`}
+            >
+              <span
+                className={`inline-block px-3 py-2 rounded-lg ${
+                  message.sender === 'user'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                }`}
+              >
+                {message.content}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="flex">
+          <input
+            type="text"
+            className="flex-grow border border-gray-300 rounded-lg px-4 py-2 mr-2"
+            placeholder="Type your message..."
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            onClick={handleSendMessage}
+            disabled={!selectedConversation}
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

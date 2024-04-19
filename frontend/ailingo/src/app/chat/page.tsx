@@ -1,17 +1,18 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/auth';
+'use client';
+
+import { useAuth } from '../../lib/useAuth';
 import { ChatInterface } from '../../components/ChatInterface';
 
-export default async function Chat() {
-  const session = await getServerSession(authOptions);
+export default function Chat() {
+  const user = useAuth();
 
-  if (!session) {
-    return <div>Access Denied</div>;
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <h1>Chat</h1>
+      <h1 className="text-2xl font-bold mb-4">Chat</h1>
       <ChatInterface />
     </div>
   );

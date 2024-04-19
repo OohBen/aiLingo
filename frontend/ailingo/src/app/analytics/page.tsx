@@ -1,20 +1,36 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/auth';
+'use client';
+
+import { useAuth } from '../../lib/useAuth';
+import { useEffect, useState } from 'react';
 import { getUserAnalytics } from '../../lib/api';
 import { AnalyticsChart } from '../../components/AnalyticsChart';
 
-export default async function Analytics() {
-  const session = await getServerSession(authOptions);
+export default function Analytics() {
+  const user = useAuth();
+  const [analytics, setAnalytics] = useState(null);
 
-  if (!session) {
-    return <div>Access Denied</div>;
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const data = await getUserAnalytics(user.email);
+        setAnalytics(data);
+      } catch (error) {
+        console.error('Failed to fetch analytics', error);
+      }
+    };
+
+    if (user) {
+      fetchAnalytics();
+    }
+  }, [user]);
+
+  if (!user || !analytics) {
+    return <div>Loading...</div>;
   }
-
-  const analytics = await getUserAnalytics(session.user.email);
 
   return (
     <div>
-      <h1>Analytics</h1>
+      <h1 className="text-2xl font-bold mb-4">Analytics</h1>
       <AnalyticsChart data={analytics} />
     </div>
   );

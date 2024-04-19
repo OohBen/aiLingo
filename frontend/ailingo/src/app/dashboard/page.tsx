@@ -1,21 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../../lib/useAuth';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      router.push('/login');
-    }
-  }, []);
+  const user = useAuth();
 
   if (!user) {
     return <div>Loading...</div>;

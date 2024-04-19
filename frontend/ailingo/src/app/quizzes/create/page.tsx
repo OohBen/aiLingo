@@ -1,16 +1,18 @@
 'use client';
 
+import { useAuth } from '../../../lib/useAuth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createQuiz } from '../../../lib/api';
 
 export default function CreateQuiz() {
+  const user = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
@@ -21,33 +23,46 @@ export default function CreateQuiz() {
     }
   };
 
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div>
-      <h1>Create Quiz</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Create Quiz</h1>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="title">Title</label>
+          <label htmlFor="title" className="block mb-1">
+            Title
+          </label>
           <input
             type="text"
             id="title"
-            name="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
         <div>
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description" className="block mb-1">
+            Description
+          </label>
           <textarea
             id="description"
-            name="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           ></textarea>
         </div>
-        <button type="submit">Create</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Create
+        </button>
       </form>
     </div>
   );
