@@ -1,22 +1,37 @@
+// src/app/quizzes/create/page.tsx
 'use client';
 
 import { useAuth } from '../../../lib/useAuth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createQuiz } from '../../../lib/api';
+import { createQuiz, getLanguages } from '../../../lib/api';
 
 export default function CreateQuiz() {
   const user = useAuth();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [language, setLanguage] = useState('');
+  const [languages, setLanguages] = useState([]);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const data = await getLanguages();
+        setLanguages(data);
+      } catch (error) {
+        console.error('Failed to fetch languages:', error);
+      }
+    };
+
+    fetchLanguages();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await createQuiz({ title, description });
+      await createQuiz({ title, language });
       router.push('/quizzes');
     } catch (error) {
       setError('An error occurred while creating the quiz. Please try again.');
@@ -46,16 +61,23 @@ export default function CreateQuiz() {
           />
         </div>
         <div>
-          <label htmlFor="description" className="block mb-1">
-            Description
+          <label htmlFor="language" className="block mb-1">
+            Language
           </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+          <select
+            id="language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded"
-          ></textarea>
+          >
+            <option value="">Select Language</option>
+            {languages.map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="submit"

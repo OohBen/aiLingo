@@ -46,7 +46,7 @@ def traverse_subdirectories(subdirectories, output_file_path):
     print("Files merged successfully!")
 
 # List of subdirectories to traverse
-subdirectories = ["aiLingo", "tempfront"]
+subdirectories = ["aiLingo"]
 
 # Output file path
 output_file_path = "merged_files.txt"

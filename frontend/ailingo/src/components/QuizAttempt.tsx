@@ -1,7 +1,9 @@
+// src/components/QuizAttempt.tsx
 'use client';
 
 import { Quiz, Question } from '../types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getQuizQuestions, submitQuizAttempt } from '../lib/api';
 
 type QuizAttemptProps = {
   quiz: Quiz;
@@ -9,32 +11,53 @@ type QuizAttemptProps = {
 
 export function QuizAttempt({ quiz }: QuizAttemptProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({});
   const [score, setScore] = useState(0);
+  const [result, setResult] = useState([]);
   const [showResult, setShowResult] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-  const handleAnswerSelect = (answer: string) => {
-    setSelectedAnswer(answer);
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const data = await getQuizQuestions(quiz.id);
+        setQuestions(data);
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
+      }
+    };
+
+    fetchQuestions();
+  }, [quiz.id]);
+
+  const handleAnswerSelect = (questionId: number, answer: number) => {
+    setSelectedAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: answer,
+    }));
   };
 
-  const handleSubmit = () => {
-    if (selectedAnswer === quiz.questions[currentQuestion].correctAnswer) {
-      setScore(score + 1);
-    }
-
-    if (currentQuestion === quiz.questions.length - 1) {
-      setShowResult(true);
+  const handleNext = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion((prevQuestion) => prevQuestion + 1);
     } else {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer('');
+      handleSubmit();
     }
   };
 
-  const handleReset = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswer('');
-    setScore(0);
-    setShowResult(false);
+  const handleSubmit = async () => {
+    try {
+      const attemptData = {
+        quiz: quiz.id,
+        user_answers: selectedAnswers,
+      };
+      const { attempt, result } = await submitQuizAttempt(attemptData);
+      setScore(attempt.score);
+      setResult(result);
+      setShowResult(true);
+    } catch (error) {
+      console.error('Failed to submit quiz attempt:', error);
+    }
   };
 
   if (showResult) {
@@ -42,45 +65,62 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
       <div className="bg-white shadow-md rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-4">Quiz Result</h2>
         <p className="mb-4">
-          Your score: {score}/{quiz.questions.length}
+          Your score: {score}%
         </p>
+        <div className="space-y-4">
+          {result.map((item, index) => (
+            <div key={index}>
+              <p className="font-semibold">{item.question}</p>
+              <p>Your Answer: {item.user_answer}</p>
+              <p>Correct Answer: {item.correct_answer}</p>
+              {item.explanation && (
+                <p className="text-green-600">Explanation: {item.explanation}</p>
+              )}
+            </div>
+          ))}
+        </div>
         <button
           onClick={handleReset}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
           Retry Quiz
         </button>
       </div>
     );
   }
+    
 
-  const question = quiz.questions[currentQuestion];
+  const question = questions[currentQuestion];
+
+  if (!question) {
+    return <div>Loading question...</div>;
+  }
 
   return (
     <div className="bg-white shadow-md rounded-lg p-4">
       <h2 className="text-xl font-semibold mb-4">{question.text}</h2>
       <div className="space-y-2">
-        {question.options.map((option, index) => (
+        {question.choices.map((choice, index) => (
           <div key={index}>
             <label className="inline-flex items-center">
               <input
                 type="radio"
                 className="form-radio"
-                name="answer"
-                value={option}
-                checked={selectedAnswer === option}
-                onChange={() => handleAnswerSelect(option)}
+                name={`answer-${question.id}`}
+                value={index}
+                checked={selectedAnswers[question.id] === index}
+                onChange={() => handleAnswerSelect(question.id, index)}
               />
-              <span className="ml-2">{option}</span>
+              <span className="ml-2">{choice}</span>
             </label>
           </div>
         ))}
       </div>
       <button
-        onClick={handleSubmit}
+        onClick={handleNext}
         className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
       >
-        {currentQuestion === quiz.questions.length - 1 ? 'Finish' : 'Next'}
+        {currentQuestion === questions.length - 1 ? 'Submit' : 'Next'}
       </button>
     </div>
   );

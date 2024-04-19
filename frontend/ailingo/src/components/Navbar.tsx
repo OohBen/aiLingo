@@ -3,18 +3,45 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getUserDetails } from '../lib/api';
 
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const fetchUserDetails = async () => {
+      const storedUser = localStorage.getItem('user');
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          const userDetails = await getUserDetails(parsedUser.email);
+          setUser(userDetails);
+        } catch (error) {
+          console.error('Failed to fetch user details:', error);
+          localStorage.removeItem('user');
+          router.push('/login');
+        }
+      }
+    };
+
+    fetchUserDetails();
   }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem('user');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('refresh_token');
@@ -59,7 +86,7 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <Link href="/create-quiz" className="text-gray-300 hover:text-white">
+                <Link href="/quizzes/create" className="text-gray-300 hover:text-white">
                   Create Quiz
                 </Link>
               </li>

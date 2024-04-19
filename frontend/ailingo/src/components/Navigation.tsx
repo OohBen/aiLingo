@@ -1,24 +1,51 @@
 'use client';
+
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-export function Navigation() {
-  const { data: session } = useSession();
+export default function Navbar() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
 
-  const handleSignOut = async () => {
-    await signOut();
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem('user');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/login');
   };
+
 
   return (
     <nav className="bg-gray-800 py-4">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        <Link href="/" className="text-white font-bold text-xl">
+          aiLingo
+        </Link>
         <ul className="flex space-x-4">
-          <li>
-            <Link href="/" className="text-white hover:text-gray-300">
-              Home
-            </Link>
-          </li>
-          {session ? (
+          {user ? (
             <>
               <li>
                 <Link href="/dashboard" className="text-white hover:text-gray-300">
@@ -31,11 +58,11 @@ export function Navigation() {
                 </Link>
               </li>
               <li>
-                <button
-                  onClick={handleSignOut}
-                  className="text-white hover:text-gray-300"
+              <button
+                  onClick={handleLogout}
+                  className="text-gray-300 hover:text-white"
                 >
-                  Sign Out
+                  Logout
                 </button>
               </li>
             </>

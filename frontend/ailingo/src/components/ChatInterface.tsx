@@ -1,8 +1,11 @@
+// src/components/ChatInterface.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createConversation, sendMessage, getConversations, getMessages, getLanguages } from '../lib/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export function ChatInterface() {
   const [conversations, setConversations] = useState([]);
@@ -12,7 +15,10 @@ export function ChatInterface() {
   const [languages, setLanguages] = useState([]);
   const [newConversationLanguage, setNewConversationLanguage] = useState('');
   const [newConversationTitle, setNewConversationTitle] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
   const router = useRouter();
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     fetchConversations();
@@ -24,6 +30,10 @@ export function ChatInterface() {
       fetchMessages();
     }
   }, [selectedConversation]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const fetchConversations = async () => {
     try {
@@ -57,14 +67,28 @@ export function ChatInterface() {
   };
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim() !== '') {
+    if (inputMessage.trim() !== '' && !isSending) {
+      setIsSending(true);
+
       try {
-        const data = await sendMessage(selectedConversation.id, inputMessage);
-        setMessages([...messages, data]);
+        const newMessage = {
+          id: Date.now().toString(),
+          conversation: selectedConversation.id,
+          sender: 'user',
+          content: inputMessage,
+          timestamp: new Date().toISOString(),
+        };
+
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
         setInputMessage('');
+
+        const data = await sendMessage(selectedConversation.id, inputMessage);
+        setMessages((prevMessages) => [...prevMessages, data]);
       } catch (error) {
         console.error('Failed to send message:', error);
       }
+
+      setIsSending(false);
     }
   };
 
@@ -79,6 +103,12 @@ export function ChatInterface() {
       } catch (error) {
         console.error('Failed to create conversation:', error);
       }
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
@@ -132,7 +162,7 @@ export function ChatInterface() {
         <h2 className="text-xl font-semibold mb-4">
           {selectedConversation?.title || 'Select a conversation'}
         </h2>
-        <div className="h-64 overflow-y-auto mb-4">
+        <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -147,7 +177,9 @@ export function ChatInterface() {
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
-                {message.content}
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {message.content.replace(/\\n/g, '\n')}
+                </ReactMarkdown>
               </span>
             </div>
           ))}
@@ -163,9 +195,9 @@ export function ChatInterface() {
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-lg"
             onClick={handleSendMessage}
-            disabled={!selectedConversation}
+            disabled={!selectedConversation || isSending}
           >
-            Send
+            {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
       </div>

@@ -161,15 +161,25 @@ class QuizAttemptView(generics.CreateAPIView):
 
         total_score = 0
         max_score = 0
+        result = []
 
         for question in quiz.question_set.all():
             user_answer = user_answers.get(str(question.id))
             max_score += question.worth
             if question.answer == user_answer:
                 total_score += question.worth
+            result.append({
+                'question': question.text,
+                'user_answer': user_answer,
+                'correct_answer': question.answer,
+                'explanation': question.explanations[question.answer - 1] if question.explanations else None,
+            })
 
         score = (total_score / max_score) * 100
         attempt = Attempt.objects.create(user=user, quiz=quiz, score=score)
         serializer = self.get_serializer(attempt)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({
+            'attempt': serializer.data,
+            'result': result,
+        }, status=status.HTTP_201_CREATED)
