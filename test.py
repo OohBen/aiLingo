@@ -1,38 +1,55 @@
-import requests
-from bs4 import BeautifulSoup
+import os
 
-def fetch_html(url):
+# Function to read a file and return its contents
+def read_file(file_path):
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Check if the request was successful
-        return response.text
-    except requests.RequestException as e:
-        print(f"Error fetching {url}: {e}")
-        return None
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        return content
+    except Exception:
+        return ""
 
-def parse_sidebar_links(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    links = soup.find_all("a", class_="md-nav__link")  # Finds all links in navigation
-    return [(link.get_text(strip=True), link['href']) for link in links if link['href'] and not link['href'].startswith('#')]
+# Function to write contents to a file
+def write_to_file(file_path, content):
+    try:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(content)
+    except Exception:
+        pass
 
-def write_to_file(filename, title, text):
-    with open(filename, 'a', encoding='utf-8') as file:
-        file.write(f"Title: {title}\nContent:\n{text}\n")
-        file.write("-" * 40 + "\n")  # Separator between entries
+# Function to check if a directory is blacklisted
+def is_blacklisted(directory):
+    blacklist = ["node_modules", "__pycache__", ".venv",'.next','.git','.idea']
+    return any(blacklisted_dir in directory for blacklisted_dir in blacklist)
 
-def main(base_url, start_path, output_file):
-    full_url = f"{base_url}{start_path}"
-    html = fetch_html(full_url)
-    if html:
-        links = parse_sidebar_links(html)
-        for title, path in links:
-            link = f"{base_url}{path}"
-            print(f"Fetching content from {title} at {link}")
-            page_html = fetch_html(link)
-            if page_html:
-                soup = BeautifulSoup(page_html, 'html.parser')
-                text = soup.get_text(separator='\n', strip=True)
-                write_to_file(output_file, title, text)
+# Function to traverse the subdirectories and merge file contents
+def traverse_subdirectories(subdirectories, output_file_path):
+    combined_content = ""
 
-# Example usage, replace `base_url` and `start_path` with your initial page to scrape
-main('https://django-ninja.dev/', '/', 'combined_text.txt')
+    for subdir in subdirectories:
+        if os.path.isdir(subdir):
+            for root, dirs, files in os.walk(subdir):
+                # Skip blacklisted directories
+                dirs[:] = [d for d in dirs if not is_blacklisted(d)]
+
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    if file_path.find("package-lock.json") == -1 and file_path.find("test.py") == -1:
+                        file_content = read_file(file_path)
+                        if file_content:
+                            combined_content += f"### {file_path} ###\n{file_content}\n\n"
+
+    # Write the combined content to the output file
+    write_to_file(output_file_path, "")  # Clear the file
+    write_to_file(output_file_path, combined_content)
+
+    print("Files merged successfully!")
+
+# List of subdirectories to traverse
+subdirectories = ["backend/aiLingo","frontend/ailingo"]
+
+# Output file path
+output_file_path = "merged_files.txt"
+
+# Traverse the subdirectories and merge file contents
+traverse_subdirectories(subdirectories, output_file_path)

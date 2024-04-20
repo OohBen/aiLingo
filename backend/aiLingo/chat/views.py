@@ -24,6 +24,7 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+
     def parse_generated_questions(self, text):
         questions_data = []
         lines = text.split("\n")
@@ -64,11 +65,6 @@ class MessageListCreateView(generics.ListCreateAPIView):
             "passing_score": passing_score,
             "questions": questions_data,
         }
-    def extract_topic_scores(self, text):
-        print(text)
-        topic_scores = json.loads(text.strip().replace("'", "\""))
-        print(topic_scores)
-        return topic_scores
 
     def get_queryset(self):
         conversation_id = self.kwargs["conversation_id"]
@@ -117,9 +113,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
             },
         ]
 
-        model = genai.GenerativeModel(model_name="gemini-1.0-pro",
-                              generation_config=generation_config,
-                              safety_settings=safety_settings)
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config,  safety_settings=safety_settings)
 
         conversation_messages = Message.objects.filter(
             conversation=conversation
@@ -135,33 +129,24 @@ class MessageListCreateView(generics.ListCreateAPIView):
         )
         learning_language = conversation.language.name
         prompt_parts = [
-            f"You are a teacher of the {learning_language} language. Reply in {home_language} and provide examples when teaching. Be supportive and helpful.",
-            "Unless specified, generate 5 example questions.",
-            f"For newline characters inside table cells, use the special character sequence \"\\n\".",
-            f"You are a teacher and master in the {learning_language} language. Use only markdown for outputting, including tables. For tables, use the following markdown rendering:",
-            "\n| Syntax      | Description |\n| ----------- | ----------- |\n| Header      | Title       |\n| Paragraph   | Text        |",
-            "Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.",
-            f"If the user asks for a quiz, FIRST add ___quiz!!!___ then generate a quiz with the following strict format:",
-            "Here's an example of a generated quiz you must follwo this exact format:",
-            "___quiz!!!___",
-            "Quiz Title: Cooking Vocabulary\nDuration: 10\nPassing Score: 80\nq: What is the English word for \"friggere\" (to fry)?\nc1: Boil\ne1: \"Boil\" significa \"bollire\" in italiano, non \"friggere\".\nc2: Bake\ne2: \"Bake\" significa \"cuocere al forno\" in italiano, non \"friggere\".\nc3: Fry\ne3: Correct! \"Fry\" significa \"friggere\" in italiano.\nc4: Grill\ne4: \"Grill\" significa \"grigliare\" in italiano, non \"friggere\".\na: 3\nw: 2\nq: How do you say \"mescolare\" (to stir) in English?\nc1: Mix\ne1: \"Mix\" significa \"miscelare\" o \"mescolare\" in italiano, ma è meno specifico di \"stir\".\nc2: Blend\ne2: \"Blend\" significa \"frullare\" o \"mescolare\" in italiano, di solito riferendosi a ingredienti liquidi o morbidi.\nc3: Stir\ne3: Correct! \"Stir\" significa \"mescolare\" in italiano.\nc4: Beat\ne4: \"Beat\" significa \"sbattere\" in italiano, non \"mescolare\".\na: 3\nw: 2\nq: What is the English translation for \"pentola\" (pot)?\nc1: Pan\ne1: \"Pan\" significa \"padella\" o \"tegame\" in italiano, non \"pentola\".\nc2: Pot\ne2: Correct! \"Pot\" significa \"pentola\" in italiano.\nc3: Kettle\ne3: \"Kettle\" significa \"bollitore\" in italiano, utilizzato per riscaldare l'acqua, non per cucinare.\nc4: Bowl\ne4: \"Bowl\" significa \"ciotola\" in italiano, non \"pentola\".\na: 2\nw: 3\nq: Translate \"affettare\" (to slice) to English.\nc1: Cut\ne1: \"Cut\" significa \"tagliare\" in italiano, che è più generico di \"affettare\".\nc2: Chop\ne2: \"Chop\" significa \"tritare\" o \"sminuzzare\" in italiano, non \"affettare\".\nc3: Slice\ne3: Correct! \"Slice\" significa \"affettare\" in italiano.\nc4: Dice\ne4: \"Dice\" significa \"tagliare a dadini\" in italiano, non \"affettare\".\na: 3\nw: 2\nq: How would you say \"grattugiare\" (to grate) in English?\nc1: Grind\ne1: \"Grind\" significa \"macinare\" in italiano, non \"grattugiare\".\nc2: Shred\ne2: \"Shred\" significa \"sminuzzare\" o \"grattugiare\" in italiano, ma di solito si riferisce a ingredienti come il formaggio o il cavolo.\nc3: Mince\ne3: \"Mince\" significa \"tritare finemente\" in italiano, non \"grattugiare\".\nc4: Grate\ne4: Correct! \"Grate\" significa \"grattugiare\" in italiano.\na: 4\nw: 2",
-            "At the end of each message, add a dictionary with the topic scores for the message, explaining what subjects you taught during this interaction. For example:",
-            "!!!TOPICS!!!: {'subjunctive': 0.1, 'travel vocab': 0.3, 'past perfect': 0.6}",
-            "Make sure to include the entire dictionary with the topic scores at the end of each message, in the format of the example. It should be the last lines of the message. Begin the dictionary with !!!TOPICS!!!: and then the dictionary in the format shown.",
-            f"Conversation history:\n{conversation_history}",
-            f"User: {user_message}",
-            "AI Teacher:",
+        "When the user submits a request:The AI should analyze the text to identify if the request is asking for a quiz, by detecting keywords such as \"quiz\", \"test\", \"questionnaire\", or \"exam\" ora.If quiz-related keywords are detected:Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:Quiz TitleDuration: Time allocated for completing the quiz (in minutes).Passing Score: Minimum score required to pass (in percentage).Questions (q:): Each followed by:Choices (c:): Multiple-choice options for the answer.Correct Answer (a:): The index of the correct choice.Explanations (e:): Explanation for why the correct answer is right.Worth (w:): Points awarded for each correct answer.If no quiz-related keywords are detected:Directly respond to the user’s query with information or answers relevant to the request without any quiz formatting. When making a quiz make sure to follow the exact format of the examples",
+        "input: Quiz on Basic  Vocabulary (User's Home Language: English, Learning: French)",
+        "output: ___QUIZ___\nQuiz Title: Basic French Vocabulary Test\nDuration: 15 minutes\nPassing Score: 80\n\nq: In English , \"apple\" translates to what in French?\nc: Pomme\nc: Poire\nc: Pêche\ne: 'Pomme' is the French word for 'apple.'\na: 1\nw: 10\n\nq: What is the French term for \"book\", if your home language is English?\nc: Livre\nc: Écriture\nc: Page\ne: 'Livre' is the correct translation for 'book' in French.\na: 1\nw: 10\n\nq: If \"cat\" is in English, what is the equivalent in French?\nc: Chat\nc: Chien\nc: Cheval\ne: 'Chat' means 'cat' in French.\na: 1\nw: 10\n\nq: Translate \"sun\" from English to French.\nc: Soleil\nc: Lune\nc: Étoile\ne: 'Soleil' is the word for 'sun' in French.\na: 1\nw: 10\n\nq: How do you say \"water\" in French, considering you speak English?\nc: Eau\nc: Vin\nc: Bière\ne: 'Eau' is the French word for 'water.'\na: 1\nw: 10",
+        "input: What's the word for 'book'? (User's Home Language: English, Learning: German)",
+        "output: The German word for 'book' is 'Buch",
+        "input: \"Could you create a quiz about basic phrases for me?\" (User's Home Language: English, Learning: Italian)",
+        "output: ___QUIZ___\nQuiz Title: Basic Italian Phrases Quiz\nDuration: 15 minutes\nPassing Score: 80\n\nq: How do you say \"Good morning\" in Italian, starting from English?\nc: Buon giorno\nc: Buona sera\nc: Buona notte\ne: 'Buon giorno' translates as 'Good morning' in Italian.\na: 1\nw: 10\n\nq: Translate \"Thank you\" from English to Italian.\nc: Grazie\nc: Prego\nc: Scusa\ne: 'Grazie' means 'Thank you' in Italian.\na: 1\nw: 10\n\nq: What is \"I love you\" in Italian, if you're an English speaker?\nc: Ti amo\nc: Ti odio\nc: Ti aspetto\ne: 'Ti amo' is Italian for 'I love you.'\na: 1\nw: 10\n\nq: How to express \"Please\" in Italian when speaking English?\nc: Per favore\nc: Per piacere\nc: Per nulla\ne: Both 'Per favore' and 'Per piacere' can be used to say 'Please' in Italian, but 'Per favore' is more common.\na: 1\nw: 10\n\nq: What is the Italian word for \"yes\", knowing English?\nc: Sì\nc: No\nc: Forse\ne: 'Sì' is the Italian word for 'yes.'\na: 1\nw: 10",
+        "conversation_history " + conversation_history,
+        f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
+        "output: ",
         ]
+        pr
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        topics = response.text[response.text.find("!!!TOPICS!!!") + 13 :]
-        response = response.text[: response.text.find("!!!TOPICS!!!")]
-
-        bot_response = response.replace("\n", "\\n")
-        print(bot_response)
-        if "___quiz!!!___" in response:
-            quiz_data = self.parse_generated_questions(response[response.find("___quiz!!!___") + 13 :])
+        
+        if "___quiz!!!___" in response.text:
+            quiz_data = self.parse_generated_questions(response.text[response.text.find("___quiz!!!___") + 13 :])
             quiz = Quiz.objects.create(
                 language=conversation.language,
                 user=request.user,
@@ -176,12 +161,10 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            # Generate a user-friendly response for quiz creation
-            bot_response = f"Quiz created successfully! You can start the quiz at /quizzes/{quiz.id}/"
+            bot_response = f"Quiz created successfully! You can start the quiz at [/quizzes/{quiz.id}/](/quizzes/{quiz.id}/)"
         else:
-            bot_response = response.replace("\n", "\\n")
+            bot_response = response.text.replace("\n", "\\n")
 
-        # Logic to save the bot's response and return it
         bot_message_serializer = MessageSerializer(
             data={
                 "conversation": conversation_id,
@@ -193,4 +176,3 @@ class MessageListCreateView(generics.ListCreateAPIView):
         bot_message_serializer.save()
 
         return Response(bot_message_serializer.data, status=status.HTTP_201_CREATED)
-    
