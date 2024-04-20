@@ -69,7 +69,6 @@ export function ChatInterface() {
   const handleSendMessage = async () => {
     if (inputMessage.trim() !== '' && !isSending) {
       setIsSending(true);
-
       try {
         const newMessage = {
           id: Date.now().toString(),

@@ -41,4 +41,4 @@ class Attempt(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.quiz.title} - {self.score}%"
+        return f"{self.user.email} - {self.quiz.title} - {self.score}%"

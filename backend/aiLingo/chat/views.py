@@ -24,42 +24,46 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
-
-    def parse_quiz_data(self, text):
-        quiz_data = {}
-        lines = text[text.find("___quiz!!!___"):].strip().split("\n")
-
+    def parse_generated_questions(self, text):
+        questions_data = []
+        lines = text.split("\n")
+        title = ""
+        duration = 0
+        passing_score = 0
+        question_data = {}
         for line in lines:
             if line.startswith("Quiz Title:"):
-                quiz_data["title"] = line.split("Quiz Title:")[1].strip()
+                title = line.split(":")[1].strip()
             elif line.startswith("Duration:"):
-                quiz_data["duration"] = int(line.split("Duration:")[1].strip())
+                duration = int(line.split(":")[1].strip())
             elif line.startswith("Passing Score:"):
-                quiz_data["passing_score"] = int(line.split("Passing Score:")[1].strip())
+                passing_score_str = line.split(":")[1].strip()
+                passing_score = int(passing_score_str)
             elif line.startswith("q:"):
-                if "questions" not in quiz_data:
-                    quiz_data["questions"] = []
-                question_data = {}
-                question_data["text"] = line.split("q:")[1].strip()
+                if question_data:
+                    questions_data.append(question_data)
+                    question_data = {}
+                question_data["text"] = line.split(":")[1].strip()
+                question_data["choices"] = []
+                question_data["explanations"] = []
             elif line.startswith("c"):
-                if "choices" not in question_data:
-                    question_data["choices"] = []
-                question_data["choices"].append(line.split("c")[1].strip())
+                question_data["choices"].append(line.split(":")[1].strip())
             elif line.startswith("e"):
-                if "explanations" not in question_data:
-                    question_data["explanations"] = []
-                question_data["explanations"].append(line.split("e")[1].strip())
+                question_data["explanations"].append(line.split(":")[1].strip())
             elif line.startswith("a:"):
-                answer_value = line.split("a:")[1].strip()
-                if answer_value.isdigit():
-                    question_data["answer"] = int(answer_value)
-                else:
-                    question_data["answer"] = None
+                question_data["answer"] = int(line.split(":")[1].strip())
             elif line.startswith("w:"):
-                question_data["worth"] = int(line.split("w:")[1].strip())
-                quiz_data["questions"].append(question_data)
+                question_data["worth"] = int(line.split(":")[1].strip())
 
-        return quiz_data if "title" in quiz_data and "duration" in quiz_data and "passing_score" in quiz_data and "questions" in quiz_data else None    
+        if question_data:
+            questions_data.append(question_data)
+
+        return {
+            "title": title,
+            "duration": duration,
+            "passing_score": passing_score,
+            "questions": questions_data,
+        }
     def extract_topic_scores(self, text):
         print(text)
         topic_scores = json.loads(text.strip().replace("'", "\""))
@@ -133,88 +137,14 @@ class MessageListCreateView(generics.ListCreateAPIView):
         prompt_parts = [
             f"You are a teacher of the {learning_language} language. Reply in {home_language} and provide examples when teaching. Be supportive and helpful.",
             "Unless specified, generate 5 example questions.",
-            "When giving the answer key to questions, ADD 888333 ANSWERKEY 888333, then on the next line, add the answers.",
             f"For newline characters inside table cells, use the special character sequence \"\\n\".",
             f"You are a teacher and master in the {learning_language} language. Use only markdown for outputting, including tables. For tables, use the following markdown rendering:",
             "\n| Syntax      | Description |\n| ----------- | ----------- |\n| Header      | Title       |\n| Paragraph   | Text        |",
             "Your role is to teach and provide explanations without directing to outside sources. Provide your responses in markdown format.",
             f"If the user asks for a quiz, FIRST add ___quiz!!!___ then generate a quiz with the following strict format:",
-            "Quiz Title: <quiz_title>",
-            "Duration: <duration_in_minutes>",
-            "Passing Score: <passing_score_percentage>",
-            "Then generate 5 multiple-choice questions for the quiz, each with the following strict format:",
-            "q: <question_text>",
-            "c1: <choice_1>",
-            "e1: <explanation_for_choice_1_in_{home_language}>",
-            "c2: <choice_2>",
-            "e2: <explanation_for_choice_2_in_{home_language}>",
-            "c3: <choice_3>",
-            "e3: <explanation_for_choice_3_in_{home_language}>",
-            "c4: <choice_4>",
-            "e4: <explanation_for_choice_4_in_{home_language}>",
-            "a: <correct_answer_choice_number>",
-            "w: <worth_of_question_as_integer>",
-            "Make sure to include all the required components for the quiz and each question. Provide the entire quiz in the specified strict format, with each question starting on a new line. If the user's message does not explicitly ask for a quiz, do not generate one.",
-            "Here's an example of a generated quiz:",
+            "Here's an example of a generated quiz you must follwo this exact format:",
             "___quiz!!!___",
-            "Quiz Title: French Greetings",
-            "Duration: 10",
-            "Passing Score: 80",
-            "q: How do you say \"Hello\" in French?",
-            "c1: Bonjour",
-            "e1: Correct! \"Bonjour\" means \"Hello\" in French.",
-            "c2: Au revoir",
-            "e2: \"Au revoir\" means \"Goodbye\" in French.",
-            "c3: Merci",
-            "e3: \"Merci\" means \"Thank you\" in French.",
-            "c4: Bonsoir",
-            "e4: \"Bonsoir\" means \"Good evening\" in French.",
-            "a: 1",
-            "w: 2",
-            "q: How do you say \"Good morning\" in French?",
-            "c1: Bonsoir",
-            "e1: \"Bonsoir\" means \"Good evening\" in French.",
-            "c2: Bonjour",
-            "e2: \"Bonjour\" is a general greeting that can be used throughout the day.",
-            "c3: Bon matin",
-            "e3: Correct! \"Bon matin\" means \"Good morning\" in French.",
-            "c4: Bonne nuit",
-            "e4: \"Bonne nuit\" means \"Good night\" in French.",
-            "a: 3",
-            "w: 2",
-            "q: What is the French word for \"please\"?",
-            "c1: Merci",
-            "e1: \"Merci\" means \"Thank you\" in French.",
-            "c2: S'il vous plaît",
-            "e2: Correct! \"S'il vous plaît\" means \"Please\" in French.",
-            "c3: Oui",
-            "e3: \"Oui\" means \"Yes\" in French.",
-            "c4: Non",
-            "e4: \"Non\" means \"No\" in French.",
-            "a: 2",
-            "w: 2",
-            "q: How do you say \"My name is...\" in French?",
-            "c1: Je m'appelle...",
-            "e1: Correct! \"Je m'appelle...\" means \"My name is...\" in French.",
-            "c2: Quel est votre nom?",
-            "e2: \"Quel est votre nom?\" means \"What is your name?\" in French.",
-            "c3: Comment allez-vous?",
-            "e3: \"Comment allez-vous?\" means \"How are you?\" in French.",
-            "c4: Merci",
-            "e4: \"Merci\" means \"Thank you\" in French.",
-            "a: 1",
-            "w: 3",
-            "q: What is the French phrase for \"Have a nice day\"?",
-            "c1: Bonne journée",
-            "e1: Correct! \"Bonne journée\" means \"Have a nice day\" in French.",
-            "c2: Bon appétit",
-            "e2: \"Bon appétit\" means \"Enjoy your meal\" in French.",
-            "c3: Au revoir",
-            "e3: \"Au revoir\" means \"Goodbye\" in French.",
-            "c4: Bien sûr",
-            "e4: \"Bien sûr\" means \"Of course\" in French.",
-            "a: 1",
-            "w: 3",
+            "Quiz Title: Cooking Vocabulary\nDuration: 10\nPassing Score: 80\nq: What is the English word for \"friggere\" (to fry)?\nc1: Boil\ne1: \"Boil\" significa \"bollire\" in italiano, non \"friggere\".\nc2: Bake\ne2: \"Bake\" significa \"cuocere al forno\" in italiano, non \"friggere\".\nc3: Fry\ne3: Correct! \"Fry\" significa \"friggere\" in italiano.\nc4: Grill\ne4: \"Grill\" significa \"grigliare\" in italiano, non \"friggere\".\na: 3\nw: 2\nq: How do you say \"mescolare\" (to stir) in English?\nc1: Mix\ne1: \"Mix\" significa \"miscelare\" o \"mescolare\" in italiano, ma è meno specifico di \"stir\".\nc2: Blend\ne2: \"Blend\" significa \"frullare\" o \"mescolare\" in italiano, di solito riferendosi a ingredienti liquidi o morbidi.\nc3: Stir\ne3: Correct! \"Stir\" significa \"mescolare\" in italiano.\nc4: Beat\ne4: \"Beat\" significa \"sbattere\" in italiano, non \"mescolare\".\na: 3\nw: 2\nq: What is the English translation for \"pentola\" (pot)?\nc1: Pan\ne1: \"Pan\" significa \"padella\" o \"tegame\" in italiano, non \"pentola\".\nc2: Pot\ne2: Correct! \"Pot\" significa \"pentola\" in italiano.\nc3: Kettle\ne3: \"Kettle\" significa \"bollitore\" in italiano, utilizzato per riscaldare l'acqua, non per cucinare.\nc4: Bowl\ne4: \"Bowl\" significa \"ciotola\" in italiano, non \"pentola\".\na: 2\nw: 3\nq: Translate \"affettare\" (to slice) to English.\nc1: Cut\ne1: \"Cut\" significa \"tagliare\" in italiano, che è più generico di \"affettare\".\nc2: Chop\ne2: \"Chop\" significa \"tritare\" o \"sminuzzare\" in italiano, non \"affettare\".\nc3: Slice\ne3: Correct! \"Slice\" significa \"affettare\" in italiano.\nc4: Dice\ne4: \"Dice\" significa \"tagliare a dadini\" in italiano, non \"affettare\".\na: 3\nw: 2\nq: How would you say \"grattugiare\" (to grate) in English?\nc1: Grind\ne1: \"Grind\" significa \"macinare\" in italiano, non \"grattugiare\".\nc2: Shred\ne2: \"Shred\" significa \"sminuzzare\" o \"grattugiare\" in italiano, ma di solito si riferisce a ingredienti come il formaggio o il cavolo.\nc3: Mince\ne3: \"Mince\" significa \"tritare finemente\" in italiano, non \"grattugiare\".\nc4: Grate\ne4: Correct! \"Grate\" significa \"grattugiare\" in italiano.\na: 4\nw: 2",
             "At the end of each message, add a dictionary with the topic scores for the message, explaining what subjects you taught during this interaction. For example:",
             "!!!TOPICS!!!: {'subjunctive': 0.1, 'travel vocab': 0.3, 'past perfect': 0.6}",
             "Make sure to include the entire dictionary with the topic scores at the end of each message, in the format of the example. It should be the last lines of the message. Begin the dictionary with !!!TOPICS!!!: and then the dictionary in the format shown.",
@@ -229,28 +159,25 @@ class MessageListCreateView(generics.ListCreateAPIView):
         response = response.text[: response.text.find("!!!TOPICS!!!")]
 
         bot_response = response.replace("\n", "\\n")
-
+        print(bot_response)
         if "___quiz!!!___" in response:
-            quiz_data = self.parse_quiz_data(response)
-            if quiz_data:
-                quiz = Quiz.objects.create(
-                    language=conversation.language,
-                    user=request.user,
-                    title=quiz_data["title"],
-                    duration=quiz_data["duration"],
-                    passing_score=quiz_data["passing_score"],
-                )
-                questions_data = quiz_data["questions"]
-                for question_data in questions_data:
-                    question_data["quiz"] = quiz.id
-                    serializer = QuestionSerializer(data=question_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
+            quiz_data = self.parse_generated_questions(response[response.find("___quiz!!!___") + 13 :])
+            quiz = Quiz.objects.create(
+                language=conversation.language,
+                user=request.user,
+                title=quiz_data["title"],
+                duration=quiz_data["duration"],
+                passing_score=quiz_data["passing_score"],
+            )
+            questions_data = quiz_data["questions"]
+            for question_data in questions_data:
+                question_data["quiz"] = quiz.id
+                serializer = QuestionSerializer(data=question_data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
 
-                # Generate a user-friendly response for quiz creation
-                bot_response = f"Quiz created successfully! You can start the quiz at /quizzes/{quiz.id}/"
-            else:
-                bot_response = "Failed to create quiz. Please try again with the correct format."
+            # Generate a user-friendly response for quiz creation
+            bot_response = f"Quiz created successfully! You can start the quiz at /quizzes/{quiz.id}/"
         else:
             bot_response = response.replace("\n", "\\n")
 
