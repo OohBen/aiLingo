@@ -166,7 +166,7 @@ class QuizAttemptView(generics.CreateAPIView):
         for question in quiz.question_set.all():
             user_answer = user_answers.get(str(question.id))
             max_score += question.worth
-            if question.answer == user_answer:
+            if question.answer == user_answer+1:
                 total_score += question.worth
             result.append({
                 'question': question.text,
