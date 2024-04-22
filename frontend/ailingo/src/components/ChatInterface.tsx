@@ -111,8 +111,6 @@ export function ChatInterface() {
     }
   };
 
-
-
   return (
     <div className="flex">
       <div className="w-1/4 bg-gray-200 p-4">
@@ -121,9 +119,8 @@ export function ChatInterface() {
           {conversations.map((conversation) => (
             <li
               key={conversation.id}
-              className={`cursor-pointer mb-2 ${
-                selectedConversation?.id === conversation.id ? 'font-bold' : ''
-              }`}
+              className={`cursor-pointer mb-2 ${selectedConversation?.id === conversation.id ? 'font-bold' : ''
+                }`}
               onClick={() => handleConversationClick(conversation)}
             >
               {conversation.title}
@@ -165,21 +162,10 @@ export function ChatInterface() {
         </h2>
         <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`mb-2 ${
-                message.sender === 'user' ? 'text-right' : 'text-left'
-              }`}
-            >
-              <span
-                className={`inline-block px-3 py-2 rounded-lg ${
-                  message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                }`}
-              >
+            <div key={message.id} className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
+              <span className={`inline-block px-3 py-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content.replace(/\\n/g, '\n')}
+                  {message.content.replace(/\n/g, '\n')}
                 </ReactMarkdown>
               </span>
             </div>
@@ -205,3 +191,5 @@ export function ChatInterface() {
     </div>
   );
 }
+
+

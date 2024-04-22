@@ -47,9 +47,9 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 question_data["text"] = line.split(":")[1].strip()
                 question_data["choices"] = []
                 question_data["explanations"] = []
-            elif line.startswith("c"):
+            elif line.startswith("c:"):
                 question_data["choices"].append(line.split(":")[1].strip())
-            elif line.startswith("e"):
+            elif line.startswith("e:"):
                 question_data["explanations"].append(line.split(":")[1].strip())
             elif line.startswith("a:"):
                 question_data["answer"] = int(line.split(":")[1].strip())
@@ -129,24 +129,23 @@ class MessageListCreateView(generics.ListCreateAPIView):
         )
         learning_language = conversation.language.name
         prompt_parts = [
-        "When the user submits a request:The AI should analyze the text to identify if the request is asking for a quiz, by detecting keywords such as \"quiz\", \"test\", \"questionnaire\", or \"exam\" ora.If quiz-related keywords are detected:Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:Quiz TitleDuration: Time allocated for completing the quiz (in minutes).Passing Score: Minimum score required to pass (in percentage).Questions (q:): Each followed by:Choices (c:): Multiple-choice options for the answer.Correct Answer (a:): The index of the correct choice.Explanations (e:): Explanation for why the correct answer is right.Worth (w:): Points awarded for each correct answer.If no quiz-related keywords are detected:Directly respond to the user’s query with information or answers relevant to the request without any quiz formatting. When making a quiz make sure to follow the exact format of the examples",
-        "input: Quiz on Basic  Vocabulary (User's Home Language: English, Learning: French)",
-        "output: ___QUIZ___\nQuiz Title: Basic French Vocabulary Test\nDuration: 15 minutes\nPassing Score: 80\n\nq: In English , \"apple\" translates to what in French?\nc: Pomme\nc: Poire\nc: Pêche\ne: 'Pomme' is the French word for 'apple.'\na: 1\nw: 10\n\nq: What is the French term for \"book\", if your home language is English?\nc: Livre\nc: Écriture\nc: Page\ne: 'Livre' is the correct translation for 'book' in French.\na: 1\nw: 10\n\nq: If \"cat\" is in English, what is the equivalent in French?\nc: Chat\nc: Chien\nc: Cheval\ne: 'Chat' means 'cat' in French.\na: 1\nw: 10\n\nq: Translate \"sun\" from English to French.\nc: Soleil\nc: Lune\nc: Étoile\ne: 'Soleil' is the word for 'sun' in French.\na: 1\nw: 10\n\nq: How do you say \"water\" in French, considering you speak English?\nc: Eau\nc: Vin\nc: Bière\ne: 'Eau' is the French word for 'water.'\na: 1\nw: 10",
+        "When the user submits a request: The AI should analyze the text to identify if the request is asking for a quiz by detecting keywords such as \"quiz\", \"test\", \"questionnaire\", or \"exam\".\nIf quiz-related keywords are detected:\n- Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.\n- Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:\n  - Quiz Title\n  - Duration: Time allocated for completing the quiz (in minutes).\n  - Passing Score: Minimum score required to pass (as an integer).\n  - Questions (q:), each followed by:\n    - Choices (c:): Multiple-choice options for the answer.\n    - Correct Answer (a:): The index of the correct choice (0-based index).\n    - Explanations (e:): Explanation for why the correct answer is right.\n    - Worth (w:): Points awarded for each correct answer.\nIf no quiz-related keywords are detected:\n- Directly respond to the user's query with information or answers relevant to the request without any quiz formatting.\n\nWhen making a quiz, make sure to follow the exact format of the examples.",
+        "input: Quiz on Basic Vocabulary (User's Home Language: English, Learning: French)",
+        "output: ___QUIZ___\nQuiz Title: Basic French Vocabulary Test\nDuration: 15\nPassing Score: 80\n\nq: In English, \"apple\" translates to what in French?\nc: Pomme\nc: Poire\nc: Pêche\ne: 'Pomme' is the French word for 'apple.'\na: 0\nw: 10\n\nq: What is the French term for \"book\", if your home language is English?\nc: Livre\nc: Écriture\nc: Page\ne: 'Livre' is the correct translation for 'book' in French.\na: 0\nw: 10\n\nq: If \"cat\" is in English, what is the equivalent in French?\nc: Chat\nc: Chien\nc: Cheval\ne: 'Chat' means 'cat' in French.\na: 0\nw: 10\n\nq: Translate \"sun\" from English to French.\nc: Soleil\nc: Lune\nc: Étoile\ne: 'Soleil' is the word for 'sun' in French.\na: 0\nw: 10\n\nq: How do you say \"water\" in French, considering you speak English?\nc: Eau\nc: Vin\nc: Bière\ne: 'Eau' is the French word for 'water.'\na: 0\nw: 10",
         "input: What's the word for 'book'? (User's Home Language: English, Learning: German)",
-        "output: The German word for 'book' is 'Buch",
+        "output: The German word for 'book' is 'Buch'.",
         "input: \"Could you create a quiz about basic phrases for me?\" (User's Home Language: English, Learning: Italian)",
-        "output: ___QUIZ___\nQuiz Title: Basic Italian Phrases Quiz\nDuration: 15 minutes\nPassing Score: 80\n\nq: How do you say \"Good morning\" in Italian, starting from English?\nc: Buon giorno\nc: Buona sera\nc: Buona notte\ne: 'Buon giorno' translates as 'Good morning' in Italian.\na: 1\nw: 10\n\nq: Translate \"Thank you\" from English to Italian.\nc: Grazie\nc: Prego\nc: Scusa\ne: 'Grazie' means 'Thank you' in Italian.\na: 1\nw: 10\n\nq: What is \"I love you\" in Italian, if you're an English speaker?\nc: Ti amo\nc: Ti odio\nc: Ti aspetto\ne: 'Ti amo' is Italian for 'I love you.'\na: 1\nw: 10\n\nq: How to express \"Please\" in Italian when speaking English?\nc: Per favore\nc: Per piacere\nc: Per nulla\ne: Both 'Per favore' and 'Per piacere' can be used to say 'Please' in Italian, but 'Per favore' is more common.\na: 1\nw: 10\n\nq: What is the Italian word for \"yes\", knowing English?\nc: Sì\nc: No\nc: Forse\ne: 'Sì' is the Italian word for 'yes.'\na: 1\nw: 10",
+        "output: ___QUIZ___\nQuiz Title: Basic Italian Phrases Quiz\nDuration: 15\nPassing Score: 80\n\nq: How do you say \"Good morning\" in Italian, starting from English?\nc: Buon giorno\nc: Buona sera\nc: Buona notte\ne: 'Buon giorno' translates as 'Good morning' in Italian.\na: 0\nw: 10\n\nq: Translate \"Thank you\" from English to Italian.\nc: Grazie\nc: Prego\nc: Scusa\ne: 'Grazie' means 'Thank you' in Italian.\na: 0\nw: 10\n\nq: What is \"I love you\" in Italian, if you're an English speaker?\nc: Ti amo\nc: Ti odio\nc: Ti aspetto\ne: 'Ti amo' is Italian for 'I love you.'\na: 0\nw: 10\n\nq: How to express \"Please\" in Italian when speaking English?\nc: Per favore\nc: Per piacere\nc: Per nulla\ne: Both 'Per favore' and 'Per piacere' can be used to say 'Please' in Italian, but 'Per favore' is more common.\na: 0\nw: 10\n\nq: What is the Italian word for \"yes\", knowing English?\nc: Sì\nc: No\nc: Forse\ne: 'Sì' is the Italian word for 'yes.'\na: 0\nw: 10",
         "conversation_history " + conversation_history,
         f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
         "output: ",
         ]
-        pr
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
         
-        if "___quiz!!!___" in response.text:
-            quiz_data = self.parse_generated_questions(response.text[response.text.find("___quiz!!!___") + 13 :])
+        if "___QUIZ___" in response.text:
+            quiz_data = self.parse_generated_questions(response.text[response.text.find("___QUIZ___") + 11 :])
             quiz = Quiz.objects.create(
                 language=conversation.language,
                 user=request.user,

@@ -1268,6 +1268,7 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+
     def parse_generated_questions(self, text):
         questions_data = []
         lines = text.split("\n")
@@ -1308,11 +1309,6 @@ class MessageListCreateView(generics.ListCreateAPIView):
             "passing_score": passing_score,
             "questions": questions_data,
         }
-    def extract_topic_scores(self, text):
-        print(text)
-        topic_scores = json.loads(text.strip().replace("'", "\""))
-        print(topic_scores)
-        return topic_scores
 
     def get_queryset(self):
         conversation_id = self.kwargs["conversation_id"]
@@ -1361,9 +1357,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
             },
         ]
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
-                              generation_config=generation_config,
-                              safety_settings=safety_settings)
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config,  safety_settings=safety_settings)
 
         conversation_messages = Message.objects.filter(
             conversation=conversation
@@ -1387,17 +1381,15 @@ class MessageListCreateView(generics.ListCreateAPIView):
         "input: \"Could you create a quiz about basic phrases for me?\" (User's Home Language: English, Learning: Italian)",
         "output: ___QUIZ___\nQuiz Title: Basic Italian Phrases Quiz\nDuration: 15 minutes\nPassing Score: 80\n\nq: How do you say \"Good morning\" in Italian, starting from English?\nc: Buon giorno\nc: Buona sera\nc: Buona notte\ne: 'Buon giorno' translates as 'Good morning' in Italian.\na: 1\nw: 10\n\nq: Translate \"Thank you\" from English to Italian.\nc: Grazie\nc: Prego\nc: Scusa\ne: 'Grazie' means 'Thank you' in Italian.\na: 1\nw: 10\n\nq: What is \"I love you\" in Italian, if you're an English speaker?\nc: Ti amo\nc: Ti odio\nc: Ti aspetto\ne: 'Ti amo' is Italian for 'I love you.'\na: 1\nw: 10\n\nq: How to express \"Please\" in Italian when speaking English?\nc: Per favore\nc: Per piacere\nc: Per nulla\ne: Both 'Per favore' and 'Per piacere' can be used to say 'Please' in Italian, but 'Per favore' is more common.\na: 1\nw: 10\n\nq: What is the Italian word for \"yes\", knowing English?\nc: Sì\nc: No\nc: Forse\ne: 'Sì' is the Italian word for 'yes.'\na: 1\nw: 10",
         "conversation_history " + conversation_history,
-        f"input: {user_message} (User's Home Language: {home_language}, Learning: {conversation.language.name})",
+        f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
         "output: ",
         ]
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        topics = response.text[response.text.find("!!!TOPICS!!!") + 13 :]
-        response = response.text[: response.text.find("!!!TOPICS!!!")]
-        print(response)
-        if "___quiz!!!___" in response:
-            quiz_data = self.parse_generated_questions(response[response.find("___quiz!!!___") + 13 :])
+        
+        if "___quiz!!!___" in response.text:
+            quiz_data = self.parse_generated_questions(response.text[response.text.find("___quiz!!!___") + 13 :])
             quiz = Quiz.objects.create(
                 language=conversation.language,
                 user=request.user,
@@ -1412,12 +1404,10 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            # Generate a user-friendly response for quiz creation
-            bot_response = f"Quiz created successfully! You can start the quiz at /quizzes/{quiz.id}/"
+            bot_response = f"Quiz created successfully! You can start the quiz at [/quizzes/{quiz.id}/](/quizzes/{quiz.id}/)"
         else:
-            bot_response = response.replace("\n", "\\n")
+            bot_response = response.text.replace("\n", "\\n")
 
-        # Logic to save the bot's response and return it
         bot_message_serializer = MessageSerializer(
             data={
                 "conversation": conversation_id,
@@ -1429,7 +1419,6 @@ class MessageListCreateView(generics.ListCreateAPIView):
         bot_message_serializer.save()
 
         return Response(bot_message_serializer.data, status=status.HTTP_201_CREATED)
-    
 
 ### backend/aiLingo/chat/apps.py ###
 from django.apps import AppConfig
