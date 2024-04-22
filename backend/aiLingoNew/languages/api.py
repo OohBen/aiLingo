@@ -1,3 +1,4 @@
+from typing import List
 from ninja import Router
 from .models import Language
 from .schemas import LanguageSchema

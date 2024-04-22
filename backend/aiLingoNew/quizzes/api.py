@@ -3,11 +3,11 @@ from django.conf import settings
 from ninja import Router
 from ninja.responses import codes_4xx
 
-from backend.aiLingoNew.users.api import AuthBearer
+from users.api import AuthBearer
 from .models import Attempt, Question, Quiz
 from .schemas import AttemptSchema, QuestionSchema, QuizSchema
 import google.generativeai as genai
-from analytics.models import UserAnalytics
+# from analytics.models import UserAnalytics
 
 router = Router()
 
@@ -129,10 +129,10 @@ async def create_quiz(request, payload: QuizSchema):
     return quiz
 
 
-#Get list of quizzes
-@router.get("/", response={200: [QuizSchema], codes_4xx: None}, auth=AuthBearer())
-async def get_quizzes(request):
-    return [quizz async for quizz in Quiz.objects.all()]
+# #Get list of quizzes
+# @router.get("/", response={200: [QuizSchema], codes_4xx: None}, auth=AuthBearer())
+# async def get_quizzes(request):
+#     return [quizz async for quizz in Quiz.objects.all()]
 
 
 

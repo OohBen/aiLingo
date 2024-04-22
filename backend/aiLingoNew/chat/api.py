@@ -1,9 +1,9 @@
 import json
 from typing import List
-from rest_framework import status
+# from rest_framework import status
 from ninja import Router
 from ninja.responses import codes_4xx
-from backend.aiLingoNew.users.api import AuthBearer
+from users.api import AuthBearer
 from languages.models import Language
 from quizzes.models import Question, Quiz
 from quizzes.schemas import QuestionSchema
@@ -11,7 +11,7 @@ from .models import Conversation, Message
 from .schemas import ConversationSchema, MessageSchema
 from django.conf import settings
 import google.generativeai as genai
-from analytics.models import UserAnalytics
+# from analytics.models import UserAnalytics
 
 router = Router()
 
