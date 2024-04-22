@@ -17,8 +17,9 @@ class ConversationListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Conversation.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
-        language_id = self.request.data.get('language', {}).get('id')
+        language_id = self.request.data.get('language')
         title = self.request.data.get('title')
         serializer.save(user=self.request.user, language_id=language_id, title=title)
 class MessageListCreateView(generics.ListCreateAPIView):
@@ -129,23 +130,22 @@ class MessageListCreateView(generics.ListCreateAPIView):
         )
         learning_language = conversation.language.name
         prompt_parts = [
-        "When the user submits a request: The AI should analyze the text to identify if the request is asking for a quiz by detecting keywords such as \"quiz\", \"test\", \"questionnaire\", or \"exam\".\nIf quiz-related keywords are detected:\n- Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.\n- Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:\n  - Quiz Title\n  - Duration: Time allocated for completing the quiz (in minutes).\n  - Passing Score: Minimum score required to pass (as an integer).\n  - Questions (q:), each followed by:\n    - Choices (c:): 4 multiple-choice options for the answer.\n    - Correct Answer (a:): The index of the correct choice (0-based index).\n    - Explanations (e:): Explanation for why the correct answer is right.\n    - Worth (w:): Points awarded for each correct answer.\nIf no quiz-related keywords are detected:\n- Directly respond to the user's query with information or answers relevant to the request without any quiz formatting.\n\nWhen making a quiz, make sure to follow the exact format of the examples and use a variety of correct answer positions, not just the first choice.",
-        "input: Quiz on Basic Vocabulary (User's Home Language: English, Learning: Spanish)",
-        "output: ___QUIZ___\nQuiz Title: Basic Spanish Vocabulary Test\nDuration: 15\nPassing Score: 80\n\nq: In English, \"book\" translates to what in Spanish?\nc: libro\nc: lápiz\nc: cuaderno\nc: mesa\ne: 'Libro' is the Spanish word for 'book'.\na: 0\nw: 10\n\nq: What is the Spanish term for \"water\", if your home language is English?\nc: leche\nc: jugo\nc: agua\nc: vino\ne: 'Agua' is the correct translation for 'water' in Spanish.\na: 2\nw: 10\n\nq: If \"house\" is in English, what is the equivalent in Spanish?\nc: carro\nc: casa\nc: perro\nc: ventana\ne: 'Casa' means 'house' in Spanish.\na: 1\nw: 10\n\nq: Translate \"apple\" from English to Spanish.\nc: plátano\nc: naranja\nc: manzana\nc: fresa\ne: 'Manzana' is the word for 'apple' in Spanish.\na: 2\nw: 10\n\nq: How do you say \"dog\" in Spanish, considering you speak English?\nc: gato\nc: caballo\nc: pájaro\nc: perro\ne: 'Perro' is the Spanish word for 'dog'.\na: 3\nw: 10",
-        "input: What's the word for 'car' in German? (User's Home Language: English)",
-        "output: The German word for 'car' is 'Auto'.",
-        "input: \"Could you create a quiz about basic phrases for me?\" (User's Homeq Language: English, Learning: Japanese)",
-        "output: ___QUIZ___\nQuiz Title: Basic Japanese Phrases Quiz\nDuration: 15\nPassing Score: 80\n\nq: How do you say \"Hello\" in Japanese, starting from English?\nc: Konnichiwa\nc: Sayonara\nc: Arigatou\nc: Ohayou\ne: 'Konnichiwa' means 'Hello' in Japanese.\na: 0\nw: 10\n\nq: Translate \"Goodbye\" from English to Japanese.\nc: Ohayou\nc: Oyasumi\nc: Sayonara\nc: Moshi moshi\ne: 'Sayonara' means 'Goodbye' in Japanese.\na: 2\nw: 10\n\nq: What is \"Thank you\" in Japanese, if you're an English speaker?\nc: Sumimasen\nc: Arigatou\nc: Onegai shimasu\nc: Wakarimasen\ne: 'Arigatou' is Japanese for 'Thank you'.\na: 1\nw: 10\n\nq: How do you say \"Yes\" in Japanese, knowing English?\nc: Iie\nc: Hai\nc: Wakarimasen\nc: Gomen nasai\ne: 'Hai' means 'Yes' in Japanese.\na: 1\nw: 10\n\nq: What is the Japanese phrase for \"Excuse me\", considering your native language is English?\nc: Gomen nasai\nc: Moshi moshi\nc: Sumimasen\nc: Onegai shimasu\ne: 'Sumimasen' is used to say 'Excuse me' in Japanese.\na: 2\nw: 10",
-        "conversation_history " + conversation_history,
-        f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
-        "output: ",
+            "When the user submits a request: The AI should analyze the text to identify if the request is asking for a quiz by detecting keywords such as \"quiz\", \"test\", \"questionnaire\", or \"exam\".\nIf quiz-related keywords are detected:\n- Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.\n- Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:\n  - Quiz Title\n  - Duration: Time allocated for completing the quiz (in minutes).\n  - Passing Score: Minimum score required to pass (as an integer).\n  - Questions (q:) in the user's home language, each followed by:\n    - Choices (c:): 4 multiple-choice options for the answer in the target language.\n    - Correct Answer (a:): The index of the correct choice (0-based index), varying the position of the correct answer.\n    - Explanations (e:): Explanation for why the correct answer is right, in the user's home language.\n    - Worth (w:): Points awarded for each correct answer.\nIf no quiz-related keywords are detected:\n- Directly respond to the user's query with information or answers relevant to the request without any quiz formatting.\n\nWhen making a quiz, make sure to follow the exact format of the examples and use a variety of correct answer positions, not just the first choice.",
+            "input: Quiz on Basic Vocabulary (User's Home Language: French, Learning: Italian)",
+            "output: ___QUIZ___\nQuiz Title: Test de vocabulaire italien de base\nDuration: 15\nPassing Score: 80\n\nq: Comment dit-on \"livre\" en italien ?\nc: libro\nc: penna\nc: quaderno\nc: tavolo\ne: 'Libro' est le mot italien pour 'livre'.\na: 0\nw: 10\n\nq: Quel est le mot italien pour \"eau\" ?\nc: latte\nc: succo\nc: acqua\nc: vino\ne: 'Acqua' est la traduction correcte de 'eau' en italien.\na: 2\nw: 10\n\nq: Traduisez \"maison\" en italien.\nc: macchina\nc: casa\nc: cane\nc: finestra\ne: 'Casa' signifie 'maison' en italien.\na: 1\nw: 10\n\nq: Comment dit-on \"pomme\" en italien ?\nc: banana\nc: arancia\nc: mela\nc: fragola\ne: 'Mela' est le mot italien pour 'pomme'.\na: 2\nw: 10\n\nq: Quel est le mot italien pour \"chien\" ?\nc: gatto\nc: cavallo\nc: uccello\nc: cane\ne: 'Cane' est le mot italien pour 'chien'.\na: 3\nw: 10",
+            "input: Quiz on Basic Phrases (User's Home Language: Dutch, Learning: English)",
+            "output: ___QUIZ___\nQuiz Title: Basisuitdrukkingen in het Engels\nDuration: 12\nPassing Score: 75\n\nq: Hoe zeg je \"Hallo\" in het Engels?\nc: Hello\nc: Goodbye\nc: Thank you\nc: Good morning\ne: 'Hello' betekent 'Hallo' in het Engels.\na: 0\nw: 10\n\nq: Wat is \"Tot ziens\" in het Engels?\nc: Good morning\nc: Good night\nc: Goodbye\nc: Hello\ne: 'Goodbye' betekent 'Tot ziens' in het Engels.\na: 2\nw: 10\n\nq: Hoe zeg je \"Dank je wel\" in het Engels?\nc: Excuse me\nc: Thank you\nc: Please\nc: I don't understand\ne: 'Thank you' is Engels voor 'Dank je wel'.\na: 1\nw: 10\n\nq: Wat is \"Ja\" in het Engels?\nc: No\nc: Yes\nc: Maybe\nc: I don't know\ne: 'Yes' betekent 'Ja' in het Engels.\na: 1\nw: 10\n\nq: Hoe zeg je \"Alstublieft\" in het Engels?\nc: I'm sorry\nc: Hello\nc: Please\nc: Thank you\ne: 'Please' wordt gebruikt om 'Alstublieft' te zeggen in het Engels.\na: 2\nw: 10",
+            "conversation_history " + conversation_history,
+            f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
+            "output: ",
         ]
+
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        
+
         if "___QUIZ___" in response.text:
-            quiz_data = self.parse_generated_questions(response.text[response.text.find("___QUIZ___") + 11 :])
+            quiz_data = self.parse_generated_questions(response.text[response.text.find("___QUIZ___") + 11:])
             quiz = Quiz.objects.create(
                 language=conversation.language,
                 user=request.user,
@@ -160,7 +160,8 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            bot_response = f"Quiz created successfully! You can start the quiz at [/quizzes/{quiz.id}/](/quizzes/{quiz.id}/)"
+            quiz_url = f"/quizzes/{quiz.id}/"
+            bot_response = f"Quiz created successfully! You can take the quiz by clicking on this link: [Take the Quiz]({quiz_url})"
         else:
             bot_response = response.text.replace("\n", "\\n")
 

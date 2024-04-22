@@ -161,16 +161,35 @@ export function ChatInterface() {
           {selectedConversation?.title || 'Select a conversation'}
         </h2>
         <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
-          {messages.map((message) => (
-            <div key={message.id} className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block px-3 py-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content.replace(/\n/g, '\n')}
-                </ReactMarkdown>
-              </span>
-            </div>
-          ))}
-        </div>
+  {messages.map((message) => (
+    <div
+      key={message.id}
+      className={`mb-2 ${
+        message.sender === 'user' ? 'text-right' : 'text-left'
+      }`}
+    >
+      <span
+        className={`inline-block px-3 py-2 rounded-lg ${
+          message.sender === 'user'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-200 text-gray-800'
+        }`}
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ node, ...props }) => (
+              <a {...props} className="text-blue-500 hover:underline" />
+            ),
+          }}
+        >
+          {message.content.replace(/\\n/g, '\n')}
+        </ReactMarkdown>
+      </span>
+    </div>
+  ))}
+</div>
+
         <div className="flex">
           <input
             type="text"
