@@ -42,7 +42,7 @@ class CreateQuizView(generics.CreateAPIView):
         },
         ]
 
-        model = genai.GenerativeModel(model_name="gemini-1.0-pro",
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
                                     generation_config=generation_config,
                                     safety_settings=safety_settings)
 
@@ -166,13 +166,15 @@ class QuizAttemptView(generics.CreateAPIView):
         for question in quiz.question_set.all():
             user_answer = user_answers.get(str(question.id))
             max_score += question.worth
-            if question.answer == user_answer+1:
+            if question.answer == user_answer:
                 total_score += question.worth
             result.append({
                 'question': question.text,
-                'user_answer': user_answer,
-                'correct_answer': question.answer,
-                'explanation': question.explanations[question.answer - 1] if question.explanations else None,
+                'user_answer_index': user_answer,
+                'user_answer': question.choices[user_answer] if user_answer is not None and user_answer < len(question.choices) else None,
+                'correct_answer_index': question.answer,
+                'correct_answer': question.choices[question.answer] if question.answer < len(question.choices) else None,
+                'explanation': question.explanations[question.answer] if question.explanations and question.answer < len(question.explanations) else None,
             })
 
         score = (total_score / max_score) * 100

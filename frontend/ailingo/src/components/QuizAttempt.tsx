@@ -77,7 +77,7 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
           {result.map((item, index) => (
             <div key={index}>
               <p className="font-semibold">{item.question}</p>
-              <p>Your Answer: {item.user_answer+1}</p>
+              <p>Your Answer: {item.user_answer}</p>
               <p>Correct Answer: {item.correct_answer}</p>
               {item.explanation && (
                 <p className="text-green-600">Explanation: {item.explanation}</p>
