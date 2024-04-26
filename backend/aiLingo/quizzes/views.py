@@ -133,9 +133,11 @@ class CreateQuizView(generics.CreateAPIView):
         }
 class QuizListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-    #queryset where user is the request user
-    queryset = Quiz.objects.get(user=self.request.user)
     serializer_class = QuizSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Quiz.objects.filter(user=user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
