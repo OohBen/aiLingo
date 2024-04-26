@@ -136,7 +136,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
             "input: Quiz on Basic Phrases (User's Home Language: Dutch, Learning: English)",
             "output: ___QUIZ___\nQuiz Title: Basisuitdrukkingen in het Engels\nDuration: 12\nPassing Score: 75\nq: Hoe zeg je \"Hallo\" in het Engels?\nc: Hello\nc: Goodbye\nc: Thank you\nc: Good morning\ne: 'Hello' betekent 'Hallo' in het Engels.\na: 0\nw: 10\nq: Wat is \"Tot ziens\" in het Engels?\nc: Good morning\nc: Good night\nc: Goodbye\nc: Hello\ne: 'Goodbye' betekent 'Tot ziens' in het Engels.\na: 2\nw: 10\nq: Hoe zeg je \"Dank je wel\" in het Engels?\nc: Excuse me\nc: Thank you\nc: Please\nc: I don't understand\ne: 'Thank you' is Engels voor 'Dank je wel'.\na: 1\nw: 10\nq: Wat is \"Ja\" in het Engels?\nc: No\nc: Yes\nc: Maybe\nc: I don't know\ne: 'Yes' betekent 'Ja' in het Engels.\na: 1\nw: 10\nq: Hoe zeg je \"Alstublieft\" in het Engels?\nc: I'm sorry\nc: Hello\nc: Please\nc: Thank you\ne: 'Please' wordt gebruikt om 'Alstublieft' te zeggen in het Engels.\na: 2\nw: 10",
             "conversation_history " + conversation_history,
-            f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language})",
+            f"input: {user_message} (User's Home Language: {home_language}, Learning: {learning_language}) Make sure all the questiosn and explations are in {home_language} and the choices are in {learning_language}",
             "output: ",
         ]
 

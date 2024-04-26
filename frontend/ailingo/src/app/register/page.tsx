@@ -16,7 +16,7 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      await registerUser({ name, email, password });
+      await registerUser(name, email, password);
       router.push('/login');
     } catch (error) {
       setError('An error occurred during registration. Please try again.');
@@ -24,12 +24,14 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <h1>Register</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Register</h1>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name" className="block mb-1">
+            Name
+          </label>
           <input
             type="text"
             id="name"
@@ -37,10 +39,13 @@ export default function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
         <div>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email" className="block mb-1">
+            Email
+          </label>
           <input
             type="email"
             id="email"
@@ -48,10 +53,13 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password" className="block mb-1">
+            Password
+          </label>
           <input
             type="password"
             id="password"
@@ -59,12 +67,21 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="w-full px-3 py-2 border border-gray-300 rounded"
           />
         </div>
-        <button type="submit">Register</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Register
+        </button>
       </form>
-      <p>
-        Already have an account? <Link href="/login">Login</Link>
+      <p className="mt-4">
+        Already have an account?{' '}
+        <Link href="/login" className="text-blue-500 hover:underline">
+          Login
+        </Link>
       </p>
     </div>
   );
