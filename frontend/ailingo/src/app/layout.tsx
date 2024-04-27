@@ -1,6 +1,20 @@
-import Navbar from '../components/Navbar';
+import Navbar from "../components/Navbar";
+import { Inter } from "next/font/google";
+import { Metadata } from "next";
+import "./globals.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "aiLingo",
+  description: "ai Language Learning",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head>
@@ -9,9 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body className={inter.className}>
         <Navbar />
-        <main className="container mx-auto mt-8">{children}</main>
+        <main>{children}</main>
       </body>
     </html>
   );

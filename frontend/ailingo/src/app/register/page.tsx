@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { registerUser } from '../../lib/api';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { registerUser } from "../../lib/api";
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,9 +17,9 @@ export default function Register() {
 
     try {
       await registerUser(name, email, password);
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      setError('An error occurred during registration. Please try again.');
+      setError("An error occurred during registration. Please try again.");
     }
   };
 
@@ -39,7 +39,7 @@ export default function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <div>
@@ -53,7 +53,7 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <div>
@@ -67,7 +67,7 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <button
@@ -78,7 +78,7 @@ export default function Register() {
         </button>
       </form>
       <p className="mt-4">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link href="/login" className="text-blue-500 hover:underline">
           Login
         </Link>

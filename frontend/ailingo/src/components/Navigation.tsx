@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -18,28 +18,27 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       setUser(storedUser ? JSON.parse(storedUser) : null);
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
     setUser(null);
-    router.push('/login');
+    router.push("/login");
   };
 
-
   return (
-    <nav className="bg-gray-800 py-4">
+    <nav className="bg-black text-white p-6">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="text-white font-bold text-xl">
           aiLingo
@@ -48,17 +47,23 @@ export default function Navbar() {
           {user ? (
             <>
               <li>
-                <Link href="/dashboard" className="text-white hover:text-gray-300">
+                <Link
+                  href="/dashboard"
+                  className="text-white hover:text-gray-300"
+                >
                   Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/profile" className="text-white hover:text-gray-300">
+                <Link
+                  href="/profile"
+                  className="text-white hover:text-gray-300"
+                >
                   Profile
                 </Link>
               </li>
               <li>
-              <button
+                <button
                   onClick={handleLogout}
                   className="text-gray-300 hover:text-white"
                 >
@@ -74,7 +79,10 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="text-white hover:text-gray-300">
+                <Link
+                  href="/register"
+                  className="text-white hover:text-gray-300"
+                >
                   Register
                 </Link>
               </li>

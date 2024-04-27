@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useAuth } from '../../lib/useAuth';
-import { useEffect, useState } from 'react';
-import { getLanguages } from '../../lib/api';
-import { LanguageList } from '../../components/LanguageList';
+import { useAuth } from "../../lib/useAuth";
+import { useEffect, useState } from "react";
+import { getLanguages } from "../../lib/api";
+import { LanguageList } from "../../components/LanguageList";
 
 export default function Languages() {
   const user = useAuth();
@@ -15,7 +15,7 @@ export default function Languages() {
         const data = await getLanguages();
         setLanguages(data);
       } catch (error) {
-        console.error('Failed to fetch languages', error);
+        console.error("Failed to fetch languages", error);
       }
     };
 
@@ -30,7 +30,7 @@ export default function Languages() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Languages</h1>
+      <h1 className="text-2xl font-bold mb-4 te">Languages</h1>
       <LanguageList languages={languages} />
     </div>
   );

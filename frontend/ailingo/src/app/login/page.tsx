@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
-import axios from 'axios';
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -24,25 +24,24 @@ export default function LoginPage() {
       const { refresh, access, user } = response.data;
 
       if (access) {
-        localStorage.setItem('refresh_token', refresh);
-        localStorage.setItem('access_token', access);
-        localStorage.setItem('user', JSON.stringify(user));
-        router.push('/dashboard');
+        localStorage.setItem("refresh_token", refresh);
+        localStorage.setItem("access_token", access);
+        localStorage.setItem("user", JSON.stringify(user));
+        router.push("/dashboard");
       } else {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('user');
-        setError('Session expired. Please login again.');
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user");
+        setError("Session expired. Please login again.");
       } else {
-        setError('An error occurred during login');
+        setError("An error occurred during login");
       }
     }
   };
-
 
   return (
     <div className="max-w-md mx-auto">
@@ -59,7 +58,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <div>
@@ -72,7 +71,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <button

@@ -1,17 +1,17 @@
 // src/app/quizzes/create/page.tsx
-'use client';
+"use client";
 
-import { useAuth } from '../../../lib/useAuth';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createQuiz, getLanguages } from '../../../lib/api';
+import { useAuth } from "../../../lib/useAuth";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createQuiz, getLanguages } from "../../../lib/api";
 
 export default function CreateQuiz() {
   const user = useAuth();
-  const [title, setTitle] = useState('');
-  const [language, setLanguage] = useState('');
+  const [title, setTitle] = useState("");
+  const [language, setLanguage] = useState("");
   const [languages, setLanguages] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function CreateQuiz() {
         const data = await getLanguages();
         setLanguages(data);
       } catch (error) {
-        console.error('Failed to fetch languages:', error);
+        console.error("Failed to fetch languages:", error);
       }
     };
 
@@ -32,9 +32,9 @@ export default function CreateQuiz() {
 
     try {
       await createQuiz({ title, language });
-      router.push('/quizzes');
+      router.push("/quizzes");
     } catch (error) {
-      setError('An error occurred while creating the quiz. Please try again.');
+      setError("An error occurred while creating the quiz. Please try again.");
     }
   };
 
@@ -57,7 +57,7 @@ export default function CreateQuiz() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
         <div>
@@ -69,7 +69,7 @@ export default function CreateQuiz() {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           >
             <option value="">Select Language</option>
             {languages.map((lang) => (

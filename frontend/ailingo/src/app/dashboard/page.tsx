@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from "../../lib/useAuth";
 
 export default function Dashboard() {
   const user = useAuth();
