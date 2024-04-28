@@ -7,17 +7,24 @@ type QuizListProps = {
 
 export function QuizList({ quizzes }: QuizListProps) {
   return (
-    <div className="space-y-4">
+    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {quizzes.map((quiz) => (
-        <div key={quiz.id} className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-2">
-            <Link href={`/quizzes/${quiz.id}`} className="text-blue-600 hover:underline">
-              {quiz.title}
+        <li key={quiz.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              <Link href={`/quizzes/${quiz.id}`} className="text-blue-600 hover:text-blue-800">
+                {quiz.title}
+              </Link>
+            </h2>
+            <p className="text-gray-600 mb-4">{quiz.description}</p>
+            <Link href={`/quizzes/${quiz.id}`}>
+              <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Start Quiz
+              </button>
             </Link>
-          </h2>
-          <p className="text-gray-600">{quiz.description}</p>
-        </div>
+          </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

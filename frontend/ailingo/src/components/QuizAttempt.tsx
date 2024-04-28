@@ -1,4 +1,5 @@
 // src/components/QuizAttempt.tsx
+
 'use client';
 
 import { Quiz, Question } from '../types';
@@ -26,7 +27,6 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
         console.error('Failed to fetch questions:', error);
       }
     };
-
     fetchQuestions();
   }, [quiz.id]);
 
@@ -59,6 +59,7 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
       console.error('Failed to submit quiz attempt:', error);
     }
   };
+
   const handleReset = () => {
     setCurrentQuestion(0);
     setSelectedAnswers({});
@@ -68,63 +69,60 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
 
   if (showResult) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-4">
-        <h2 className="text-xl font-semibold mb-4">Quiz Result</h2>
-        <p className="mb-4">
-          Your score: {score}%
-        </p>
-        <div className="space-y-4">
+      <div className="bg-white shadow-lg rounded-lg p-8">
+        <h2 className="text-3xl font-bold mb-6">Quiz Result</h2>
+        <p className="text-xl mb-8">Your score: {score}%</p>
+        <div className="space-y-6">
           {result.map((item, index) => (
-            <div key={index}>
-              <p className="font-semibold">{item.question}</p>
-              <p>Your Answer: {item.user_answer}</p>
-              <p>Correct Answer: {item.correct_answer}</p>
+            <div key={index} className="border border-gray-300 rounded-lg p-6">
+              <p className="text-lg font-semibold mb-2">{item.question}</p>
+              <p className="mb-2">Your Answer: {item.user_answer}</p>
+              <p className="mb-2">Correct Answer: {item.correct_answer}</p>
               {item.explanation && (
-                <p className="text-green-600">Explanation: {item.explanation}</p>
+                <p className="text-green-600">{item.explanation}</p>
               )}
             </div>
           ))}
         </div>
         <button
           onClick={handleReset}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="mt-8 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700"
         >
           Retry Quiz
         </button>
       </div>
     );
   }
-    
 
   const question = questions[currentQuestion];
-
   if (!question) {
-    return <div>Loading question...</div>;
+    return <div className="text-xl font-semibold">Loading question...</div>;
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-4">{question.text}</h2>
-      <div className="space-y-2">
+    <div className="bg-white shadow-lg rounded-lg p-8">
+      <h2 className="text-3xl font-bold mb-6">{question.text}</h2>
+      <div className="space-y-4">
         {question.choices.map((choice, index) => (
-          <div key={index}>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                className="form-radio"
-                name={`answer-${question.id}`}
-                value={index}
-                checked={selectedAnswers[question.id] === index}
-                onChange={() => handleAnswerSelect(question.id, index)}
-              />
-              <span className="ml-2">{choice}</span>
+          <div key={index} className="flex items-center">
+            <input
+              type="radio"
+              id={`answer-${question.id}-${index}`}
+              className="form-radio h-5 w-5 text-blue-600"
+              name={`answer-${question.id}`}
+              value={index}
+              checked={selectedAnswers[question.id] === index}
+              onChange={() => handleAnswerSelect(question.id, index)}
+            />
+            <label htmlFor={`answer-${question.id}-${index}`} className="ml-3 text-lg">
+              {choice}
             </label>
           </div>
         ))}
       </div>
       <button
         onClick={handleNext}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+        className="mt-8 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700"
       >
         {currentQuestion === questions.length - 1 ? 'Submit' : 'Next'}
       </button>

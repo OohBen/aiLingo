@@ -3,18 +3,31 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getUserDetails } from "../lib/api";
 
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const fetchUserDetails = async () => {
+      const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          const userDetails = await getUserDetails(parsedUser.email);
+          setUser(userDetails);
+        } catch (error) {
+          console.error("Failed to fetch user details:", error);
+          localStorage.removeItem("user");
+          router.push("/login");
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [router]);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -38,7 +51,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-black text-white p-6">
+    <nav className="bg-blue-900 text-white p-6">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="text-white font-bold text-xl">
           aiLingo
@@ -47,26 +60,47 @@ export default function Navbar() {
           {user ? (
             <>
               <li>
-                <Link
-                  href="/dashboard"
-                  className="text-white hover:text-gray-300"
-                >
+                <Link href="/dashboard" className="text-blue-200 hover:text-white">
                   Dashboard
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/profile"
-                  className="text-white hover:text-gray-300"
-                >
+                <Link href="/profile" className="text-blue-200 hover:text-white">
                   Profile
                 </Link>
               </li>
               <li>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-300 hover:text-white"
-                >
+                <Link href="/languages" className="text-blue-200 hover:text-white">
+                  Languages
+                </Link>
+              </li>
+              <li>
+                <Link href="/lessons" className="text-blue-200 hover:text-white">
+                  Lessons
+                </Link>
+              </li>
+              <li>
+                <Link href="/quizzes" className="text-blue-200 hover:text-white">
+                  Quizzes
+                </Link>
+              </li>
+              <li>
+                <Link href="/quizzes/create" className="text-blue-200 hover:text-white">
+                  Create Quiz
+                </Link>
+              </li>
+              <li>
+                <Link href="/chat" className="text-blue-200 hover:text-white">
+                  Chat
+                </Link>
+              </li>
+              <li>
+                <Link href="/analytics" className="text-blue-200 hover:text-white">
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <button onClick={handleLogout} className="text-blue-200 hover:text-white">
                   Logout
                 </button>
               </li>
@@ -74,45 +108,17 @@ export default function Navbar() {
           ) : (
             <>
               <li>
-                <Link href="/login" className="text-white hover:text-gray-300">
+                <Link href="/login" className="text-blue-200 hover:text-white">
                   Login
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/register"
-                  className="text-white hover:text-gray-300"
-                >
+                <Link href="/register" className="text-blue-200 hover:text-white">
                   Register
                 </Link>
               </li>
             </>
           )}
-          <li>
-            <Link href="/languages" className="text-white hover:text-gray-300">
-              Languages
-            </Link>
-          </li>
-          <li>
-            <Link href="/lessons" className="text-white hover:text-gray-300">
-              Lessons
-            </Link>
-          </li>
-          <li>
-            <Link href="/quizzes" className="text-white hover:text-gray-300">
-              Quizzes
-            </Link>
-          </li>
-          <li>
-            <Link href="/chat" className="text-white hover:text-gray-300">
-              Chat
-            </Link>
-          </li>
-          <li>
-            <Link href="/analytics" className="text-white hover:text-gray-300">
-              Analytics
-            </Link>
-          </li>
         </ul>
       </div>
     </nav>
