@@ -11,16 +11,15 @@ export default function Navbar() {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      const storedUser = localStorage.getItem("user");
-
-      if (storedUser) {
+      const accessToken = localStorage.getItem("access_token");
+      if (accessToken) {
         try {
-          const parsedUser = JSON.parse(storedUser);
-          const userDetails = await getUserDetails(parsedUser.email);
+          const userDetails = await getUserDetails(accessToken);
           setUser(userDetails);
         } catch (error) {
           console.error("Failed to fetch user details:", error);
-          localStorage.removeItem("user");
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
           router.push("/login");
         }
       }
@@ -29,23 +28,9 @@ export default function Navbar() {
     fetchUserDetails();
   }, []);
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const storedUser = localStorage.getItem("user");
-      setUser(storedUser ? JSON.parse(storedUser) : null);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
   const handleLogout = () => {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("access_token");
-    localStorage.removeItem("user");
     setUser(null);
     router.push("/login");
   };
