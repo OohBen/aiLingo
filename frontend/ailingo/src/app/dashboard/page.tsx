@@ -43,7 +43,7 @@ export default function Dashboard() {
         <div className="bg-blue-500 text-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold mb-4">Quizzes</h2>
           <p className="mb-4">Test your language skills with quizzes.</p>
-          <Link href="/lessons">
+          <Link href="/quizzes">
             <button className="bg-white text-blue-500 font-bold py-2 px-4 rounded">
               Go to Quizzes
             </button>
@@ -53,7 +53,7 @@ export default function Dashboard() {
         <div className="bg-green-500 text-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold mb-4">Lessons</h2>
           <p className="mb-4">Explore and learn new languages.</p>
-          <Link href="/quizzes">
+          <Link href="/lessons">
             <button className="bg-white text-green-500 font-bold py-2 px-4 rounded">
               Go to Lessons
             </button>
@@ -73,7 +73,9 @@ export default function Dashboard() {
 
       {lastThreeQuizzes.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Recently Attempted Quizzes</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Recently Attempted Quizzes
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {lastThreeQuizzes.map((quiz) => (
               <div

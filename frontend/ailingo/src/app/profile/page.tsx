@@ -42,9 +42,9 @@ export default function Profile() {
           />
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center ">
           <h2 className="text-2xl font-bold mb-4">Languages</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-wrap justify-center gap-4 ">
             {languages.map((language) => (
               <div
                 key={language.id}
