@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getQuizById } from '../../../lib/api';
-import { QuizAttempt } from '../../../components/QuizAttempt';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getQuizById } from "../../../lib/api";
+import { QuizAttempt } from "../../../components/QuizAttempt";
 
 export default function QuizPage({ params }: { params: { id: string } }) {
   const [user, setUser] = useState(null);
@@ -11,11 +11,11 @@ export default function QuizPage({ params }: { params: { id: string } }) {
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      router.push('/login');
+      router.push("/login");
     }
   }, []);
 
@@ -25,7 +25,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         const data = await getQuizById(params.id);
         setQuiz(data);
       } catch (error) {
-        console.error('Failed to fetch quiz', error);
+        console.error("Failed to fetch quiz", error);
       }
     };
 
@@ -44,8 +44,8 @@ export default function QuizPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-4xl font-bold mb-8">{quiz.title}</h1>
+      <div className="bg-white text-black rounded-lg shadow-lg p-8">
+        <h1 className=" text-4xl font-bold mb-8">{quiz.title}</h1>
         <QuizAttempt quiz={quiz} />
       </div>
     </div>
