@@ -45,7 +45,7 @@ export default function Dashboard() {
           <p className="mb-4">Test your language skills with quizzes.</p>
           <Link href="/lessons">
             <button className="bg-white text-blue-500 font-bold py-2 px-4 rounded">
-              Go to Lessons
+              Go to Quizzes
             </button>
           </Link>
         </div>
@@ -55,7 +55,7 @@ export default function Dashboard() {
           <p className="mb-4">Explore and learn new languages.</p>
           <Link href="/quizzes">
             <button className="bg-white text-green-500 font-bold py-2 px-4 rounded">
-              Go to Quizzes
+              Go to Lessons
             </button>
           </Link>
         </div>
