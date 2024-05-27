@@ -16,13 +16,16 @@ export function ChatInterface() {
   const [newConversationLanguage, setNewConversationLanguage] = useState('');
   const [newConversationTitle, setNewConversationTitle] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
-    fetchConversations();
-    fetchLanguages();
+    setIsLoading(true);
+    Promise.all([fetchConversations(), fetchLanguages()]).finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -110,6 +113,18 @@ export function ChatInterface() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex">
       <div className="w-1/4 bg-gray-800 p-4 text-white">
@@ -118,8 +133,9 @@ export function ChatInterface() {
           {conversations.map((conversation) => (
             <li
               key={conversation.id}
-              className={`cursor-pointer mb-2 ${selectedConversation?.id === conversation.id ? 'font-bold text-blue-300' : ''
-                }`}
+              className={`cursor-pointer mb-2 ${
+                selectedConversation?.id === conversation.id ? 'font-bold text-blue-300' : ''
+              }`}
               onClick={() => handleConversationClick(conversation)}
             >
               {conversation.title}
@@ -163,23 +179,17 @@ export function ChatInterface() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-2 ${
-                message.sender === 'user' ? 'text-right' : 'text-left'
-              }`}
+              className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
             >
               <span
                 className={`inline-block px-3 py-2 rounded-lg ${
-                  message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-300 text-gray-800'
+                  message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-800'
                 }`}
               >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    a: ({ node, ...props }) => (
-                      <a {...props} className="text-blue-500 hover:underline" />
-                    ),
+                    a: ({ node, ...props }) => <a {...props} className="text-blue-500 hover:underline" />,
                   }}
                 >
                   {message.content.replace(/\\n/g, '\n')}
@@ -196,6 +206,7 @@ export function ChatInterface() {
             placeholder="Type your message..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-lg"
@@ -209,5 +220,3 @@ export function ChatInterface() {
     </div>
   );
 }
-
-
