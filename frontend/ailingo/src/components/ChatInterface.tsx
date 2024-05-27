@@ -110,16 +110,15 @@ export function ChatInterface() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
-
   return (
     <div className="flex">
-      <div className="w-1/4 bg-gray-200 p-4">
+      <div className="w-1/4 bg-gray-800 p-4 text-white">
         <h2 className="text-xl font-semibold mb-4">Conversations</h2>
         <ul>
           {conversations.map((conversation) => (
             <li
               key={conversation.id}
-              className={`cursor-pointer mb-2 ${selectedConversation?.id === conversation.id ? 'font-bold' : ''
+              className={`cursor-pointer mb-2 ${selectedConversation?.id === conversation.id ? 'font-bold text-blue-300' : ''
                 }`}
               onClick={() => handleConversationClick(conversation)}
             >
@@ -130,7 +129,7 @@ export function ChatInterface() {
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">New Conversation</h3>
           <select
-            className="block w-full mb-2"
+            className="block w-full mb-2 bg-gray-700 text-white"
             value={newConversationLanguage}
             onChange={(e) => setNewConversationLanguage(e.target.value)}
           >
@@ -143,7 +142,7 @@ export function ChatInterface() {
           </select>
           <input
             type="text"
-            className="block w-full mb-2"
+            className="block w-full mb-2 bg-gray-700 text-white"
             placeholder="Conversation Title"
             value={newConversationTitle}
             onChange={(e) => setNewConversationTitle(e.target.value)}
@@ -156,44 +155,44 @@ export function ChatInterface() {
           </button>
         </div>
       </div>
-      <div className="w-3/4 bg-white shadow-md rounded-lg p-4">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="w-3/4 bg-gray-100 shadow-md rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
           {selectedConversation?.title || 'Select a conversation'}
         </h2>
         <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
-  {messages.map((message) => (
-    <div
-      key={message.id}
-      className={`mb-2 ${
-        message.sender === 'user' ? 'text-right' : 'text-left'
-      }`}
-    >
-      <span
-        className={`inline-block px-3 py-2 rounded-lg ${
-          message.sender === 'user'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-800'
-        }`}
-      >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a: ({ node, ...props }) => (
-              <a {...props} className="text-blue-500 hover:underline" />
-            ),
-          }}
-        >
-          {message.content.replace(/\\n/g, '\n')}
-        </ReactMarkdown>
-      </span>
-    </div>
-  ))}
-</div>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`mb-2 ${
+                message.sender === 'user' ? 'text-right' : 'text-left'
+              }`}
+            >
+              <span
+                className={`inline-block px-3 py-2 rounded-lg ${
+                  message.sender === 'user'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-300 text-gray-800'
+                }`}
+              >
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({ node, ...props }) => (
+                      <a {...props} className="text-blue-500 hover:underline" />
+                    ),
+                  }}
+                >
+                  {message.content.replace(/\\n/g, '\n')}
+                </ReactMarkdown>
+              </span>
+            </div>
+          ))}
+        </div>
 
         <div className="flex">
           <input
             type="text"
-            className="flex-grow border border-gray-300 rounded-lg px-4 py-2 mr-2"
+            className="flex-grow border border-gray-300 rounded-lg px-4 py-2 mr-2 text-black"
             placeholder="Type your message..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
