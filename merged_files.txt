@@ -26,7 +26,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyAycw0N3czwCu-m3B1ZQ6apwQLN8QLLwFU
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+//pls work deploy
 
 def main():
     """Run administrative tasks."""
