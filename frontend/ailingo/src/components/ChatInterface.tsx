@@ -143,33 +143,33 @@ export function ChatInterface() {
           ))}
         </ul>
         <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">New Conversation</h3>
-        <select
-          className="block w-full mb-2 bg-gray-700 text-white"
-          value={newConversationLanguage}
-          onChange={(e) => setNewConversationLanguage(e.target.value)}
-        >
-          <option value="">Select Language</option>
-          {languages.map((language) => (
-            <option key={language.id} value={language.id}>
-              {language.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          className="block w-full mb-2 bg-gray-700 text-white"
-          placeholder="Conversation Title"
-          value={newConversationTitle}
-          onChange={(e) => setNewConversationTitle(e.target.value)}
-        />
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-          onClick={handleCreateConversation}
-        >
-          Create Conversation
-        </button>
-      </div>
+          <h3 className="text-lg font-semibold mb-2">New Conversation</h3>
+          <select
+            className="block w-full mb-2 bg-gray-700 text-white"
+            value={newConversationLanguage}
+            onChange={(e) => setNewConversationLanguage(e.target.value)}
+          >
+            <option value="">Select Language</option>
+            {languages.map((language) => (
+              <option key={language.id} value={language.id}>
+                {language.name}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="block w-full mb-2 bg-gray-700 text-white"
+            placeholder="Conversation Title"
+            value={newConversationTitle}
+            onChange={(e) => setNewConversationTitle(e.target.value)}
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            onClick={handleCreateConversation}
+          >
+            Create Conversation
+          </button>
+        </div>
       </div>
       <div className="w-3/4 bg-gray-100 shadow-md rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
@@ -187,13 +187,13 @@ export function ChatInterface() {
                 }`}
               >
                 <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  a: ({ node, ...props }) => <a {...props} className="text-blue-500 hover:underline" />,
-                }}
-              >
-                {(message.content as string).replace(/\\n/g, '\n')}
-              </ReactMarkdown>
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({ node, ...props }) => <a {...props} className="text-blue-500 hover:underline" />,
+                  }}
+                >
+                  {(message.content as string).replace(/\\n/g, '\n')}
+                </ReactMarkdown>
               </span>
             </div>
           ))}

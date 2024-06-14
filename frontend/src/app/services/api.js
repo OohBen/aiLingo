@@ -50,6 +50,8 @@ export const getLesson = async (lessonId) => {
   }
 };
 
+
+
 export const getQuiz = async (quizId) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/quizzes/${quizId}`);

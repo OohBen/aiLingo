@@ -150,7 +150,16 @@ export const getConversations = async () => {
 
 export const createConversation = async (languageId: string, title: string) => {
   try {
-    const response = await axiosInstance.post('/chat/conversations/', { language: languageId, title });
+    const accessToken = localStorage.getItem('access_token');
+    const response = await axiosInstance.post(
+      '/chat/conversations/',
+      { language: languageId, title },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     handleError(error);
