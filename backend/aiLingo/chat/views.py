@@ -135,7 +135,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        response_text = response["text"]  # Access the correct property for text content
+        response_text = response.text  # Access the correct property for text content
         response_text = response_text[response_text.find("output:")+8:]
 
         if "___QUIZ___" in response_text:
