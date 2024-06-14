@@ -21,6 +21,14 @@ export const getLessonsForLanguage = async (languageId) => {
     throw error;
   }
 };
+export const createConversation = async (languageId, title) => {
+  try {
+    const response = await axiosInstance.post('/chat/conversations/', { language: languageId, title });
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
 
 export const getQuizzesForLanguage = async (languageId) => {
   try {
