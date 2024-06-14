@@ -17,6 +17,7 @@ export function ChatInterface() {
   const [newConversationTitle, setNewConversationTitle] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const router = useRouter();
   const chatContainerRef = useRef(null);
@@ -95,20 +96,25 @@ export function ChatInterface() {
   };
 
   const handleCreateConversation = async () => {
-    if (newConversationLanguage && newConversationTitle) {
-      try {
-        console.log('Creating conversation with', newConversationLanguage, newConversationTitle); // Debug
-        const data = await createConversation(newConversationLanguage, newConversationTitle);
-        console.log('Conversation created:', data); // Debug
-        setConversations([...conversations, data]);
-        setSelectedConversation(data);
-        setNewConversationLanguage('');
-        setNewConversationTitle('');
-      } catch (error) {
-        console.error('Failed to create conversation:', error);
-      }
-    } else {
-      console.warn('Language and title must be selected'); // Debug
+    if (!newConversationLanguage) {
+      setErrorMessage('Please select a language.');
+      return;
+    }
+
+    if (!newConversationTitle) {
+      setErrorMessage('Please enter a conversation title.');
+      return;
+    }
+
+    try {
+      setErrorMessage('');
+      const data = await createConversation(newConversationLanguage, newConversationTitle);
+      setConversations([...conversations, data]);
+      setSelectedConversation(data);
+      setNewConversationLanguage('');
+      setNewConversationTitle('');
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
     }
   };
 
@@ -148,6 +154,7 @@ export function ChatInterface() {
         </ul>
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">New Conversation</h3>
+          {errorMessage && <p className="text-red-500 mb-2">{errorMessage}</p>}
           <select
             className="block w-full mb-2 bg-gray-700 text-white"
             value={newConversationLanguage}
