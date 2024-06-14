@@ -187,13 +187,13 @@ export function ChatInterface() {
                 }`}
               >
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({ node, ...props }) => <a {...props} className="text-blue-500 hover:underline" />,
-                  }}
-                >
-                  {message.content.replace(/\\n/g, '\n')}
-                </ReactMarkdown>
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ node, ...props }) => <a {...props} className="text-blue-500 hover:underline" />,
+                }}
+              >
+                {(message.content as string).replace(/\\n/g, '\n')}
+              </ReactMarkdown>
               </span>
             </div>
           ))}

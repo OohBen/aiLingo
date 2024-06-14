@@ -1,10 +1,9 @@
 export interface Question {
-    id: number;
-    text: string;
-    options: string[];
-    correctAnswer: string;
-  }
-  
+  id: number;
+  text: string;
+  choices: string[];
+  correctAnswer: string;
+}
   export interface Quiz {
     id: number;
     title: string;

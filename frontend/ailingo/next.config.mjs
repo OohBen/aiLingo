@@ -1,9 +1,9 @@
-// next.config.mjs
+/** @type {import('next').NextConfig} */
 const nextConfig = {
     typescript: {
-      ignoreBuildErrors: true,
-    },
-    // Other configuration options...
-  };
-  
-  module.exports = nextConfig;
+        ignoreBuildErrors: true,
+      },
+//disaslbe eslint
+
+};
+export default nextConfig;
