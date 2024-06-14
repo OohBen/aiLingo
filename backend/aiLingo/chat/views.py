@@ -22,7 +22,6 @@ class ConversationListCreateView(generics.ListCreateAPIView):
         language_id = self.request.data.get('language')
         title = self.request.data.get('title')
         serializer.save(user=self.request.user, language_id=language_id, title=title)
-
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
@@ -115,11 +114,20 @@ class MessageListCreateView(generics.ListCreateAPIView):
             },
         ]
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config, safety_settings=safety_settings)
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config,  safety_settings=safety_settings)
 
-        conversation_messages = Message.objects.filter(conversation=conversation).order_by("timestamp")
-        conversation_history = "\n".join([f"{message.sender}: {message.content}" for message in conversation_messages])
-        home_language = request.user.home_language.name if request.user.home_language else "English"
+        conversation_messages = Message.objects.filter(
+            conversation=conversation
+        ).order_by("timestamp")
+        conversation_history = "\n".join(
+            [
+                f"{message.sender}: {message.content}"
+                for message in conversation_messages
+            ]
+        )
+        home_language = (
+            request.user.home_language.name if request.user.home_language else "English"
+        )
         learning_language = conversation.language.name
         prompt_parts = [
             "When the user submits a request, analyze the text to identify if it is asking for a quiz by detecting keywords such as \"quiz\", \"test\", \"questionnaire\",  \"exam\", or any other phrases or words that would make you think the user is asking for a quiz.\n\nIf quiz-related keywords are detected:\n- Append the tag ___QUIZ___ at the top of the response to indicate a quiz-based response.\n- Format the quiz response to include exactly five questions, and ensure each quiz contains the following elements:\n  - Quiz Title\n  - Duration: Time allocated for completing the quiz (in minutes).\n  - Passing Score: Minimum score required to pass (as an integer).\n  - Questions (q:) in the user's home language, each followed by:\n    - Choices (c:): 4 multiple-choice options for the answer in the target language.\n    - Correct Answer (a:): The index of the correct choice (0-based index), varying the position of the correct answer.\n    - Explanations (e:): Explanation for why the correct answer is right, in the user's home language.\n    - Worth (w:): Points awarded for each correct answer.\n\nIf no quiz-related keywords are detected or if you can not make a quiz from the requested text then you are to :\n- Respond to the user's request as a regular chat interaction, providing relevant information, answers, or engaging in conversation based on the user's input.\n\nWhen making a quiz, make sure to follow the exact format of the examples and use a variety of correct answer positions, not just the first choice.",
@@ -135,11 +143,9 @@ class MessageListCreateView(generics.ListCreateAPIView):
         prompt = "\n".join(prompt_parts)
 
         response = model.generate_content(prompt)
-        response_text = response.text  # Access the correct property for text content
-        response_text = response_text[response_text.find("output:")+8:]
 
-        if "___QUIZ___" in response_text:
-            quiz_data = self.parse_generated_questions(response_text[response_text.find("___QUIZ___") + 11:])
+        if "___QUIZ___" in response.text:
+            quiz_data = self.parse_generated_questions(response.text[response.text.find("___QUIZ___") + 11:])
             quiz = Quiz.objects.create(
                 language=conversation.language,
                 user=request.user,
@@ -157,7 +163,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
             quiz_url = f"/quizzes/{quiz.id}/"
             bot_response = f"Quiz created successfully! You can take the quiz by clicking on this link: [Take the Quiz]({quiz_url})"
         else:
-            bot_response = response_text.replace("\n", "\\n")
+            bot_response = response.text.replace("\n", "\\n")
 
         bot_message_serializer = MessageSerializer(
             data={
