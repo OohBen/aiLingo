@@ -155,6 +155,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
 
         prompt = "\n".join(prompt_parts)
 
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest")
         response = model.generate_content(prompt, tools=tools)
 
         if "function_call" in response.text:
