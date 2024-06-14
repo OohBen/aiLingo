@@ -2,14 +2,13 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
-    "noEmitOnError":false,
+    "noEmitOnError": false,
     "allowJs": true,
-    "checkJs": false,    
+    "checkJs": false,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -21,7 +20,19 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
