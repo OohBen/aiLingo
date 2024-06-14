@@ -97,7 +97,9 @@ export function ChatInterface() {
   const handleCreateConversation = async () => {
     if (newConversationLanguage && newConversationTitle) {
       try {
+        console.log('Creating conversation with', newConversationLanguage, newConversationTitle); // Debug
         const data = await createConversation(newConversationLanguage, newConversationTitle);
+        console.log('Conversation created:', data); // Debug
         setConversations([...conversations, data]);
         setSelectedConversation(data);
         setNewConversationLanguage('');
@@ -105,6 +107,8 @@ export function ChatInterface() {
       } catch (error) {
         console.error('Failed to create conversation:', error);
       }
+    } else {
+      console.warn('Language and title must be selected'); // Debug
     }
   };
 
