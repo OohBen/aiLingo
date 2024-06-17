@@ -7,6 +7,7 @@ from .models import Attempt, Question, Quiz
 from .serializers import AttemptSerializer, QuestionSerializer, QuizSerializer
 import google.generativeai as genai
 from analytics.models import UserAnalytics
+from languages.models import Language
 
 class CreateQuizView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -15,7 +16,7 @@ class CreateQuizView(generics.CreateAPIView):
         genai.configure(api_key=settings.GOOGLE_GENERATIVE_AI_API_KEY)
 
         home_language = request.user.home_language.name if request.user.home_language else "English"
-
+        learning_language = Language.objects.get(id=request.data["language"]).name
         generation_config = {
         "temperature": 0.9,
         "top_p": 1,
@@ -63,7 +64,7 @@ class CreateQuizView(generics.CreateAPIView):
             "output: Quiz Title: Präpositionen\nDuration: 12\nPassing Score: 80\nq: Which preposition correctly completes the sentence \"I'm going home\" in German?\nc: zu Hause\nc: auf Hause\nc: in Hause\nc: an Hause\ne: \"zu\" is used to indicate movement towards a destination, such as \"to\" or \"towards\" in English.\na: 0\nw: 3\nq: Choose the correct preposition for the sentence \"The book is lying on the table\" in German.\nc: in dem Tisch\nc: an dem Tisch\nc: auf dem Tisch\nc: über dem Tisch\ne: \"auf\" means \"on\" or \"onto\" in English, usually referring to a surface or a direction upwards.\na: 2\nw: 3\nq: Which preposition is used in the sentence \"I come from Berlin\" in German?\nc: aus Berlin\nc: von Berlin\nc: bei Berlin\nc: nach Berlin\ne: \"aus\" is used to indicate origin or source, such as \"from\" or \"out of\" in English.\na: 0\nw: 3\nq: Complete the sentence with the correct preposition in German: \"He is waiting for his girlfriend\".\nc: für seine Freundin\nc: um seine Freundin\nc: auf seine Freundin\nc: zu seine Freundin\ne: \"auf\" is used with the verb \"warten\" (to wait) to mean \"for\" in English.\na: 2\nw: 3\nq: Choose the correct preposition for the sentence \"We are going on vacation\" in German.\nc: in den Urlaub\nc: an den Urlaub\nc: auf den Urlaub\nc: zu den Urlaub\ne: \"in\" is used with the accusative case to indicate a destination or a period of time, such as \"on\" vacation.\na: 0\nw: 3",
             "input: Generate a quiz titled \"Cooking Vocabulary\" for Italian speakers learning English.",
             "output: Quiz Title: Cooking Vocabulary\nDuration: 10\nPassing Score: 80\nq: Come si dice \"friggere\" in inglese?\nc: Boil\nc: Bake\nc: Fry\nc: Grill\ne: \"Fry\" significa \"friggere\" in inglese.\na: 2\nw: 2\nq: Qual è la traduzione di \"mescolare\" in inglese?\nc: Mix\nc: Blend\nc: Stir\nc: Beat\ne: \"Stir\" significa \"mescolare\" in inglese.\na: 2\nw: 2\nq: Come si traduce \"pentola\" in inglese?\nc: Pan\nc: Pot\nc: Kettle\nc: Bowl\ne: \"Pot\" significa \"pentola\" in inglese.\na: 1\nw: 3\nq: Qual è la traduzione di \"affettare\" in inglese?\nc: Cut\nc: Chop\nc: Slice\nc: Dice\ne: \"Slice\" significa \"affettare\" in inglese.\na: 2\nw: 2\nq: Come si dice \"grattugiare\" in inglese?\nc: Grind\nc: Shred\nc: Mince\nc: Grate\ne: \"Grate\" significa \"grattugiare\" in inglese.\na: 3\nw: 2",
-            f"input: Generate a quiz titled \"{request.data['title']}\" for {home_language} speakers learning {request.data['language']}. Passing score must be an integer not a percent, same with the time just an integer amount of minutes. Follow the examples given exactly in that format. In addition please make sure if a quiz is made all the questions ande explanations are made {home_language} and all the answers made in {request.data['language']}",
+            f"input: Generate a quiz about {learning_language} {request.data['title']} for {home_language} speakers learning {request.data['language']} title it appropriately. Passing score must be an integer not a percent, same with the time just an integer amount of minutes. Follow the examples given exactly in that format. In addition please make sure if a quiz is made all the questions ande explanations are made {home_language} and all the answers made in {request.data['language']}",
             "output: ",
         ]
 

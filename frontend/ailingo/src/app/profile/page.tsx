@@ -1,26 +1,27 @@
+// frontend/ailingo/src/app/profile/page.tsx
 "use client";
 
 import Image from "next/image";
 import { useAuth } from "../../lib/useAuth";
 import { useEffect, useState } from "react";
-import { getLanguages } from "../../lib/api";
+import { getUserDetails } from "../../lib/api";
 
 export default function Profile() {
   const user = useAuth();
-  const [languages, setLanguages] = useState([]);
+  const [homeLanguage, setHomeLanguage] = useState(null);
 
   useEffect(() => {
-    const fetchLanguages = async () => {
+    const fetchUserDetails = async () => {
       try {
-        const data = await getLanguages();
-        setLanguages(data);
+        const data = await getUserDetails(user.email);
+        setHomeLanguage(data.home_language);
       } catch (error) {
-        console.error("Failed to fetch languages", error);
+        console.error("Failed to fetch user details", error);
       }
     };
 
     if (user) {
-      fetchLanguages();
+      fetchUserDetails();
     }
   }, [user]);
 
@@ -42,20 +43,6 @@ export default function Profile() {
           />
         </div>
 
-        <div className="mt-8 text-center ">
-          <h2 className="text-2xl font-bold mb-4">Languages</h2>
-          <div className="flex flex-wrap justify-center gap-4 ">
-            {languages.map((language) => (
-              <div
-                key={language.id}
-                className="bg-blue-600 rounded-lg px-4 py-2 text-center"
-              >
-                <span className="text-lg font-semibold">{language.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="mt-8 text-center">
           <div className="mb-2">
             <span className="font-semibold">Name:</span>{" "}
@@ -65,6 +52,12 @@ export default function Profile() {
             <span className="font-semibold">Email:</span>{" "}
             <span className="text-lg">{user.email}</span>
           </div>
+          {homeLanguage && (
+            <div className="mb-2">
+              <span className="font-semibold">Home Language:</span>{" "}
+              <span className="text-lg">{homeLanguage.name}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

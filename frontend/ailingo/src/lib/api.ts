@@ -60,14 +60,24 @@ export const login = async (email: string, password: string) => {
     }
   };
 
-export const registerUser = async (name: string, email: string, password: string) => {
-  try {
-    const response = await axiosInstance.post('/users/register/', { name, email, password });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
+  export const registerUser = async (
+    name: string,
+    email: string,
+    password: string,
+    homeLanguage: string
+  ) => {
+    try {
+      const response = await axiosInstance.post("/users/register/", {
+        name,
+        email,
+        password,
+        home_language: homeLanguage,
+      });
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
 export const getUserDetails = async (email: string) => {
   try {
@@ -200,5 +210,6 @@ export const submitQuizAttempt = async (attemptData: { quiz: number; user_answer
     handleError(error);
   }
 };
+
 
 

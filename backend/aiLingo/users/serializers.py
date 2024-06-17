@@ -28,21 +28,24 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
-        fields = [
-            "id",
-            "email",
-            "name",
-            "profile_pic",
-            "date_joined",
-            "is_premium",
-            "password",
-            "home_language",
+            model = User
+            fields = [
+                "id",
+                "email",
+                "name",
+                "profile_pic",
+                "date_joined",
+                "is_premium",
+                "password",
+                "home_language",
         ]
 
     def create(self, validated_data):
         password = validated_data.pop("password")
+        home_language_id = validated_data.pop("home_language", None)
         user = User.objects.create(**validated_data)
         user.set_password(password)
+        if home_language_id:
+            user.home_language_id = home_language_id
         user.save()
         return user

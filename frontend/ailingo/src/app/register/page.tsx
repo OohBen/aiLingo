@@ -1,22 +1,38 @@
+// frontend/ailingo/src/app/register/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerUser } from "../../lib/api";
+import { registerUser, getLanguages } from "../../lib/api";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [homeLanguage, setHomeLanguage] = useState("");
   const [error, setError] = useState("");
+  const [languages, setLanguages] = useState([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const data = await getLanguages();
+        setLanguages(data);
+      } catch (error) {
+        console.error("Failed to fetch languages", error);
+      }
+    };
+
+    fetchLanguages();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await registerUser(name, email, password);
+      await registerUser(name, email, password, homeLanguage);
       router.push("/login");
     } catch (error) {
       setError("An error occurred during registration. Please try again.");
@@ -69,6 +85,26 @@ export default function Register() {
             required
             className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
+        </div>
+        <div>
+          <label htmlFor="homeLanguage" className="block mb-1">
+            Home Language
+          </label>
+          <select
+            id="homeLanguage"
+            name="homeLanguage"
+            value={homeLanguage}
+            onChange={(e) => setHomeLanguage(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
+          >
+            <option value="">Select your home language</option>
+            {languages.map((language) => (
+              <option key={language.id} value={language.id}>
+                {language.name}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="submit"
