@@ -14,20 +14,21 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+  
     try {
       const response = await axios.post(`${API_BASE_URL}/users/login/`, {
         email,
         password,
       });
-
+  
       const { refresh, access, user } = response.data;
-
+  
       if (access) {
         localStorage.setItem("refresh_token", refresh);
         localStorage.setItem("access_token", access);
         localStorage.setItem("user", JSON.stringify(user));
         router.push("/dashboard");
+        window.location.reload();
       } else {
         setError("Invalid email or password");
       }

@@ -79,27 +79,32 @@ export const login = async (email: string, password: string) => {
     }
   };
 
-export const getUserDetails = async (email: string) => {
+  export const getUserDetails = async () => {
+    try {
+      const response = await axiosInstance.get("/users/profile/");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  };
+  
+  export const getLanguages = async () => {
+    try {
+      const response = await axiosInstance.get("/languages/");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+};
+
+export const getRecentQuizzes = async () => {
   try {
-    const response = await axiosInstance.get(`/users/profile/`, {
-      params: { email },
-    });
+    const response = await axiosInstance.get("/quizzes/recent/");
     return response.data;
   } catch (error) {
     handleError(error);
   }
 };
-
-export const getLanguages = async () => {
-  try {
-    const response = await axiosInstance.get('/languages/');
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-
 export const getLessons = async () => {
   try {
     const response = await axiosInstance.get('/lessons/');

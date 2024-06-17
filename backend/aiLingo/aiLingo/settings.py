@@ -137,6 +137,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 AUTH_USER_MODEL = "users.User"
 
 AUTHENTICATION_BACKENDS = [

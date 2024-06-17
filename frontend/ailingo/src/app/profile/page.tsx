@@ -4,30 +4,46 @@
 import Image from "next/image";
 import { useAuth } from "../../lib/useAuth";
 import { useEffect, useState } from "react";
-import { getUserDetails } from "../../lib/api";
+import { getUserDetails, getLanguages } from "../../lib/api";
 
 export default function Profile() {
   const user = useAuth();
   const [homeLanguage, setHomeLanguage] = useState(null);
+  const [languages, setLanguages] = useState([]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const data = await getUserDetails(user.email);
+        const data = await getUserDetails();
         setHomeLanguage(data.home_language);
       } catch (error) {
         console.error("Failed to fetch user details", error);
       }
     };
 
+    const fetchLanguages = async () => {
+      try {
+        const data = await getLanguages();
+        setLanguages(data);
+      } catch (error) {
+        console.error("Failed to fetch languages", error);
+      }
+    };
+
     if (user) {
       fetchUserDetails();
+      fetchLanguages();
     }
   }, [user]);
 
   if (!user) {
     return <div>Loading...</div>;
   }
+
+  const getHomeLanguageName = () => {
+    const language = languages.find((lang) => lang.id === homeLanguage);
+    return language ? language.name : "";
+  };
 
   return (
     <div className="container mx-auto px-4 mt-8 max-w-md">
@@ -55,7 +71,7 @@ export default function Profile() {
           {homeLanguage && (
             <div className="mb-2">
               <span className="font-semibold">Home Language:</span>{" "}
-              <span className="text-lg">{homeLanguage.name}</span>
+              <span className="text-lg">{getHomeLanguageName()}</span>
             </div>
           )}
         </div>

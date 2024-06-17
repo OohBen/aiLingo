@@ -1,26 +1,27 @@
+// frontend/ailingo/src/app/dashboard/page.tsx
 "use client";
 
 import { useAuth } from "../../lib/useAuth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getQuizzes } from "../../lib/api";
+import { getRecentQuizzes } from "../../lib/api";
 
 export default function Dashboard() {
   const user = useAuth();
-  const [quizzes, setQuizzes] = useState([]);
+  const [recentQuizzes, setRecentQuizzes] = useState([]);
 
   useEffect(() => {
-    const fetchQuizzes = async () => {
+    const fetchRecentQuizzes = async () => {
       try {
-        const data = await getQuizzes();
-        setQuizzes(data);
+        const data = await getRecentQuizzes();
+        setRecentQuizzes(data);
       } catch (error) {
-        console.error("Failed to fetch quizzes", error);
+        console.error("Failed to fetch recent quizzes", error);
       }
     };
 
     if (user) {
-      fetchQuizzes();
+      fetchRecentQuizzes();
     }
   }, [user]);
 
@@ -31,8 +32,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  const lastThreeQuizzes = quizzes.slice(-3).reverse();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,13 +70,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {lastThreeQuizzes.length > 0 && (
+      {recentQuizzes.length > 0 && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
             Recently Attempted Quizzes
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {lastThreeQuizzes.map((quiz) => (
+            {recentQuizzes.map((quiz) => (
               <div
                 key={quiz.id}
                 className="bg-blue-500 text-white rounded-lg shadow-lg p-4"

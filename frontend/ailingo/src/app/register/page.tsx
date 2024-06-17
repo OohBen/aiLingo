@@ -30,15 +30,18 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      await registerUser(name, email, password, homeLanguage);
-      router.push("/login");
+      const data = await registerUser(name, email, password, homeLanguage);
+      localStorage.setItem("refresh_token", data.refresh);
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/dashboard");
+      window.location.reload();
     } catch (error) {
       setError("An error occurred during registration. Please try again.");
     }
   };
-
   return (
     <div className="max-w-md mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Register</h1>

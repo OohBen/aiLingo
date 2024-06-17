@@ -5,6 +5,7 @@ from .views import (
     QuizRetrieveUpdateDestroyView,
     CreateQuizView,
     QuizQuestionsView,
+    recent_quizzes,
 )
 
 urlpatterns = [
@@ -20,4 +21,6 @@ urlpatterns = [
         "<int:quiz_id>/questions/", QuizQuestionsView.as_view(), name="quiz-questions"
     ),
     path("attempt/", QuizAttemptView.as_view(), name="quiz-attempt"),
+    path("recent/", recent_quizzes, name="recent-quizzes"),
+
 ]

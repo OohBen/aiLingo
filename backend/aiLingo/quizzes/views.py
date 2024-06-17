@@ -8,7 +8,15 @@ from .serializers import AttemptSerializer, QuestionSerializer, QuizSerializer
 import google.generativeai as genai
 from analytics.models import UserAnalytics
 from languages.models import Language
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+@api_view(['GET'])
+def recent_quizzes(request):
+    user = request.user
+    recent_quizzes = Quiz.objects.filter(user=user).order_by('-id')[:3]
+    serializer = QuizSerializer(recent_quizzes, many=True)
+    return Response(serializer.data)
 class CreateQuizView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 

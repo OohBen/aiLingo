@@ -1,3 +1,4 @@
+// frontend/ailingo/src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default function Navbar() {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
         try {
-          const userDetails = await getUserDetails(accessToken);
+          const userDetails = await getUserDetails();
           setUser(userDetails);
         } catch (error) {
           console.error("Failed to fetch user details:", error);
@@ -26,6 +27,23 @@ export default function Navbar() {
     };
 
     fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const accessToken = localStorage.getItem("access_token");
+      if (accessToken) {
+        fetchUserDetails();
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
