@@ -693,22 +693,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
-        fields = [
-            "id",
-            "email",
-            "name",
-            "profile_pic",
-            "date_joined",
-            "is_premium",
-            "password",
-            "home_language",
+            model = User
+            fields = [
+                "id",
+                "email",
+                "name",
+                "profile_pic",
+                "date_joined",
+                "is_premium",
+                "password",
+                "home_language",
         ]
 
     def create(self, validated_data):
         password = validated_data.pop("password")
+        home_language_id = validated_data.pop("home_language", None)
         user = User.objects.create(**validated_data)
         user.set_password(password)
+        if home_language_id:
+            user.home_language_id = home_language_id
         user.save()
         return user
 
@@ -1402,6 +1405,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 AUTH_USER_MODEL = "users.User"
 
 AUTHENTICATION_BACKENDS = [
@@ -1607,6 +1611,7 @@ from .views import (
     QuizRetrieveUpdateDestroyView,
     CreateQuizView,
     QuizQuestionsView,
+    recent_quizzes,
 )
 
 urlpatterns = [
@@ -1622,6 +1627,8 @@ urlpatterns = [
         "<int:quiz_id>/questions/", QuizQuestionsView.as_view(), name="quiz-questions"
     ),
     path("attempt/", QuizAttemptView.as_view(), name="quiz-attempt"),
+    path("recent/", recent_quizzes, name="recent-quizzes"),
+
 ]
 
 
@@ -1636,7 +1643,15 @@ from .serializers import AttemptSerializer, QuestionSerializer, QuizSerializer
 import google.generativeai as genai
 from analytics.models import UserAnalytics
 from languages.models import Language
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+@api_view(['GET'])
+def recent_quizzes(request):
+    user = request.user
+    recent_quizzes = Quiz.objects.filter(user=user).order_by('-id')[:3]
+    serializer = QuizSerializer(recent_quizzes, many=True)
+    return Response(serializer.data)
 class CreateQuizView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -1645,7 +1660,6 @@ class CreateQuizView(generics.CreateAPIView):
 
         home_language = request.user.home_language.name if request.user.home_language else "English"
         learning_language = Language.objects.get(id=request.data["language"]).name
-        print(learning_language)
         generation_config = {
         "temperature": 0.9,
         "top_p": 1,
@@ -2968,31 +2982,52 @@ export default function Dashboard() {
 
 
 ### frontend/ailingo/src/app/register/page.tsx ###
+// frontend/ailingo/src/app/register/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerUser } from "../../lib/api";
+import { registerUser, getLanguages } from "../../lib/api";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [homeLanguage, setHomeLanguage] = useState("");
   const [error, setError] = useState("");
+  const [languages, setLanguages] = useState([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const data = await getLanguages();
+        setLanguages(data);
+      } catch (error) {
+        console.error("Failed to fetch languages", error);
+      }
+    };
+
+    fetchLanguages();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      await registerUser(name, email, password);
-      router.push("/login");
+      const data = await registerUser(name, email, password, homeLanguage);
+      localStorage.setItem("refresh_token", data.refresh);
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/dashboard");
+      // Pause for .5 seconds to allow the router to finish the push
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      window.location.reload();
     } catch (error) {
       setError("An error occurred during registration. Please try again.");
     }
   };
-
   return (
     <div className="max-w-md mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Register</h1>
@@ -3040,6 +3075,26 @@ export default function Register() {
             className="w-full px-3 py-2 border border-gray-300 rounded text-black"
           />
         </div>
+        <div>
+          <label htmlFor="homeLanguage" className="block mb-1">
+            Home Language
+          </label>
+          <select
+            id="homeLanguage"
+            name="homeLanguage"
+            value={homeLanguage}
+            onChange={(e) => setHomeLanguage(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded text-black"
+          >
+            <option value="">Select your home language</option>
+            {languages.map((language) => (
+              <option key={language.id} value={language.id}>
+                {language.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           type="submit"
           className="w-full bg-blue-500 text-white px-4 py-2 rounded"
@@ -3057,20 +3112,30 @@ export default function Register() {
   );
 }
 
-
 ### frontend/ailingo/src/app/profile/page.tsx ###
+// frontend/ailingo/src/app/profile/page.tsx
 "use client";
 
 import Image from "next/image";
 import { useAuth } from "../../lib/useAuth";
 import { useEffect, useState } from "react";
-import { getLanguages } from "../../lib/api";
+import { getUserDetails, getLanguages } from "../../lib/api";
 
 export default function Profile() {
   const user = useAuth();
+  const [homeLanguage, setHomeLanguage] = useState(null);
   const [languages, setLanguages] = useState([]);
 
   useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const data = await getUserDetails();
+        setHomeLanguage(data.home_language);
+      } catch (error) {
+        console.error("Failed to fetch user details", error);
+      }
+    };
+
     const fetchLanguages = async () => {
       try {
         const data = await getLanguages();
@@ -3081,6 +3146,7 @@ export default function Profile() {
     };
 
     if (user) {
+      fetchUserDetails();
       fetchLanguages();
     }
   }, [user]);
@@ -3088,6 +3154,11 @@ export default function Profile() {
   if (!user) {
     return <div>Loading...</div>;
   }
+
+  const getHomeLanguageName = () => {
+    const language = languages.find((lang) => lang.id === homeLanguage);
+    return language ? language.name : "";
+  };
 
   return (
     <div className="container mx-auto px-4 mt-8 max-w-md">
@@ -3103,20 +3174,6 @@ export default function Profile() {
           />
         </div>
 
-        <div className="mt-8 text-center ">
-          <h2 className="text-2xl font-bold mb-4">Languages</h2>
-          <div className="flex flex-wrap justify-center gap-4 ">
-            {languages.map((language) => (
-              <div
-                key={language.id}
-                className="bg-blue-600 rounded-lg px-4 py-2 text-center"
-              >
-                <span className="text-lg font-semibold">{language.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="mt-8 text-center">
           <div className="mb-2">
             <span className="font-semibold">Name:</span>{" "}
@@ -3126,12 +3183,17 @@ export default function Profile() {
             <span className="font-semibold">Email:</span>{" "}
             <span className="text-lg">{user.email}</span>
           </div>
+          {homeLanguage && (
+            <div className="mb-2">
+              <span className="font-semibold">Home Language:</span>{" "}
+              <span className="text-lg">{getHomeLanguageName()}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
 
 ### frontend/ailingo/src/app/lessons/page.tsx ###
 // 'use client';
@@ -3409,6 +3471,9 @@ export default function LoginPage() {
         localStorage.setItem("access_token", access);
         localStorage.setItem("user", JSON.stringify(user));
         router.push("/dashboard");
+        // Pause for .5 seconds to allow the router to finish the push
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.location.reload();
       } else {
         setError("Invalid email or password");
       }
@@ -3507,6 +3572,7 @@ export default function Analytics() {
 }
 
 ### frontend/ailingo/src/components/Navbar.tsx ###
+// frontend/ailingo/src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -3523,7 +3589,7 @@ export default function Navbar() {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
         try {
-          const userDetails = await getUserDetails(accessToken);
+          const userDetails = await getUserDetails();
           setUser(userDetails);
         } catch (error) {
           console.error("Failed to fetch user details:", error);
@@ -3535,6 +3601,23 @@ export default function Navbar() {
     };
 
     fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const accessToken = localStorage.getItem("access_token");
+      if (accessToken) {
+        fetchUserDetails();
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -4333,36 +4416,51 @@ export const login = async (email: string, password: string) => {
     }
   };
 
-export const registerUser = async (name: string, email: string, password: string) => {
+  export const registerUser = async (
+    name: string,
+    email: string,
+    password: string,
+    homeLanguage: string
+  ) => {
+    try {
+      const response = await axiosInstance.post("/users/register/", {
+        name,
+        email,
+        password,
+        home_language: homeLanguage,
+      });
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  export const getUserDetails = async () => {
+    try {
+      const response = await axiosInstance.get("/users/profile/");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+  };
+  
+  export const getLanguages = async () => {
+    try {
+      const response = await axiosInstance.get("/languages/");
+      return response.data;
+    } catch (error) {
+      handleError(error);
+    }
+};
+
+export const getRecentQuizzes = async () => {
   try {
-    const response = await axiosInstance.post('/users/register/', { name, email, password });
+    const response = await axiosInstance.get("/quizzes/recent/");
     return response.data;
   } catch (error) {
     handleError(error);
   }
 };
-
-export const getUserDetails = async (email: string) => {
-  try {
-    const response = await axiosInstance.get(`/users/profile/`, {
-      params: { email },
-    });
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const getLanguages = async () => {
-  try {
-    const response = await axiosInstance.get('/languages/');
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-
 export const getLessons = async () => {
   try {
     const response = await axiosInstance.get('/lessons/');
@@ -4473,6 +4571,7 @@ export const submitQuizAttempt = async (attemptData: { quiz: number; user_answer
     handleError(error);
   }
 };
+
 
 
 

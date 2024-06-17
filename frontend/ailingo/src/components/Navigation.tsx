@@ -16,7 +16,7 @@ export default function Navbar() {
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
-          const userDetails = await getUserDetails(parsedUser.email);
+          const userDetails = await getUserDetails();
           setUser(userDetails);
         } catch (error) {
           console.error("Failed to fetch user details:", error);

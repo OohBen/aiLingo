@@ -33,7 +33,7 @@ export default function Navbar() {
     const handleStorageChange = () => {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
-        fetchUserDetails();
+        getUserDetails();
       } else {
         setUser(null);
       }
