@@ -14,20 +14,22 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
+
     try {
       const response = await axios.post(`${API_BASE_URL}/users/login/`, {
         email,
         password,
       });
-  
+
       const { refresh, access, user } = response.data;
-  
+
       if (access) {
         localStorage.setItem("refresh_token", refresh);
         localStorage.setItem("access_token", access);
         localStorage.setItem("user", JSON.stringify(user));
         router.push("/dashboard");
+        // Pause for .5 seconds to allow the router to finish the push
+        await new Promise((resolve) => setTimeout(resolve, 100));
         window.location.reload();
       } else {
         setError("Invalid email or password");

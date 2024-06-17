@@ -37,6 +37,8 @@ export default function Register() {
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/dashboard");
+      // Pause for .5 seconds to allow the router to finish the push
+      await new Promise((resolve) => setTimeout(resolve, 100));
       window.location.reload();
     } catch (error) {
       setError("An error occurred during registration. Please try again.");
