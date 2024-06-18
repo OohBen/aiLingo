@@ -18,7 +18,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
-ALLOWED_HOSTS = ["localhost", "127.0.0.1","ailingo.onrender.com",'.koyeb.app']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1","ailingo.onrender.com",'bold-ardath-ailingo-8339d7ad.koyeb.app','.koyeb.app']
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
