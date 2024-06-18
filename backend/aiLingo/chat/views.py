@@ -51,7 +51,7 @@ class MessageListCreateView(generics.ListCreateAPIView):
                 question_data["explanations"] = []
             elif line.startswith("c:"):
                 question_data["choices"].append(line.split(":")[1].strip())
-            elif line.startswith("e:"):
+            elif line.startswith("e"):
                 question_data["explanations"].append(line.split(":")[1].strip())
             elif line.startswith("a:"):
                 question_data["answer"] = int(line.split(":")[1].strip())

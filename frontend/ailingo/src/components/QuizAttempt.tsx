@@ -76,9 +76,7 @@ export function QuizAttempt({ quiz }: QuizAttemptProps) {
           {result.map((item, index) => (
             <div key={index} className="border border-gray-300 rounded-lg p-6">
               <p className="text-lg font-semibold mb-2">{item.question}</p>
-              <p className={`mb-2 ${item.user_answer_index === item.correct_answer_index ? 'text-green-600' : 'text-red-600'}`}>
-                Your Answer: {item.user_answer}
-              </p>
+              <p className="mb-2">Your Answer: {item.user_answer}</p>
               <p className="mb-2">Correct Answer: {item.correct_answer}</p>
               {item.explanation && (
                 <p className="text-green-600">{item.explanation}</p>
