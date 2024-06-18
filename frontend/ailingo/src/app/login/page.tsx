@@ -2,48 +2,31 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import axios from "axios";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { login } from "../../lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/users/login/`, {
-        email,
-        password,
-      });
-
-      const { refresh, access, user } = response.data;
-
-      if (access) {
-        localStorage.setItem("refresh_token", refresh);
-        localStorage.setItem("access_token", access);
-        localStorage.setItem("user", JSON.stringify(user));
-        router.push("/dashboard");
-        // Pause for .5 seconds to allow the router to finish the push
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        window.location.reload();
-      } else {
-        setError("Invalid email or password");
-      }
+      const data = await login(email, password);
+      localStorage.setItem("refresh_token", data.refresh);
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/dashboard");
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
-        setError("Session expired. Please login again.");
-      } else {
-        setError("An error occurred during login");
-      }
+      setError("Invalid email or password");
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -79,9 +62,10 @@ export default function LoginPage() {
         </div>
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Login
+          {isLoading ? "Loading..." : "Login"}
         </button>
       </form>
     </div>

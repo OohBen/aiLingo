@@ -10,7 +10,6 @@ const axiosInstance = axios.create({
   },
 });
 
-
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -34,15 +33,13 @@ axiosInstance.interceptors.response.use(
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        throw refreshError;
       }
     }
 
     return Promise.reject(error);
   }
 );
-
-
 
 const handleError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
@@ -52,50 +49,51 @@ const handleError = (error: unknown) => {
 };
 
 export const login = async (email: string, password: string) => {
-    try {
-      const response = await axiosInstance.post('/users/login/', { email, password });
-      return response.data;
-    } catch (error) {
-      handleError(error);
-    }
-  };
-
-  export const registerUser = async (
-    name: string,
-    email: string,
-    password: string,
-    homeLanguage: string
-  ) => {
-    try {
-      const response = await axiosInstance.post("/users/register/", {
-        name,
-        email,
-        password,
-        home_language: homeLanguage,
-      });
-      return response.data;
-    } catch (error) {
-      handleError(error);
-    }
-  };
-
-  export const getUserDetails = async () => {
-    try {
-      const response = await axiosInstance.get("/users/profile/");
-      return response.data;
-    } catch (error) {
-      handleError(error);
-    }
-  };
-  
-  export const getLanguages = async () => {
-    try {
-      const response = await axiosInstance.get("/languages/");
-      return response.data;
-    } catch (error) {
-      handleError(error);
-    }
+  try {
+    const response = await axiosInstance.post('/users/login/', { email, password });
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
+
+export const registerUser = async (
+  name: string,
+  email: string,
+  password: string,
+  homeLanguage: string
+) => {
+  try {
+    const response = await axiosInstance.post("/users/register/", {
+      name,
+      email,
+      password,
+      home_language: homeLanguage,
+    });
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const getUserDetails = async () => {
+  try {
+    const response = await axiosInstance.get("/users/profile/");
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const getLanguages = async () => {
+  try {
+    const response = await axiosInstance.get("/languages/");
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
 
 export const getRecentQuizzes = async () => {
   try {

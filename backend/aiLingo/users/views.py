@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
-
 class RegisterView(APIView):
     permission_classes = []
 
@@ -27,7 +26,6 @@ class RegisterView(APIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginView(APIView):
     permission_classes = []
@@ -59,7 +57,6 @@ class LoginView(APIView):
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
-
 class ProfileView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -67,9 +64,8 @@ class ProfileView(APIView):
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        data = serializer.data
-        data["is_superuser"] = user.is_superuser
-        return Response(data)
+        return Response(serializer.data)
+
     def patch(self, request):
         user = request.user
         serializer = UserSerializer(user, data=request.data, partial=True)
@@ -77,8 +73,6 @@ class ProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 class RefreshTokenView(APIView):
     permission_classes = []

@@ -1,4 +1,3 @@
-// frontend/ailingo/src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -21,7 +20,7 @@ export default function Navbar() {
           console.error("Failed to fetch user details:", error);
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-          router.push("/login");
+          setUser(null);
         }
       }
     };
@@ -29,26 +28,10 @@ export default function Navbar() {
     fetchUserDetails();
   }, []);
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (accessToken) {
-        getUserDetails();
-      } else {
-        setUser(null);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
   const handleLogout = () => {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
     setUser(null);
     router.push("/login");
   };

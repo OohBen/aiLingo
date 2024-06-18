@@ -1,4 +1,3 @@
-// frontend/ailingo/src/app/register/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,6 +12,7 @@ export default function Register() {
   const [homeLanguage, setHomeLanguage] = useState("");
   const [error, setError] = useState("");
   const [languages, setLanguages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,20 +30,22 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    setIsLoading(true);
+    setError("");
+
     try {
       const data = await registerUser(name, email, password, homeLanguage);
       localStorage.setItem("refresh_token", data.refresh);
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/dashboard");
-      // Pause for .5 seconds to allow the router to finish the push
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      window.location.reload();
     } catch (error) {
       setError("An error occurred during registration. Please try again.");
     }
+
+    setIsLoading(false);
   };
+
   return (
     <div className="max-w-md mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Register</h1>
@@ -113,9 +115,10 @@ export default function Register() {
         </div>
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Register
+          {isLoading ? "Loading..." : "Register"}
         </button>
       </form>
       <p className="mt-4">
