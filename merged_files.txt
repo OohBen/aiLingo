@@ -1286,7 +1286,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
-ALLOWED_HOSTS = ["localhost", "127.0.0.1","ailingo.onrender.com"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1","ailingo.onrender.com",'bold-ardath-ailingo-8339d7ad.koyeb.app','.koyeb.app']
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -1404,8 +1404,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "/static/"
 AUTH_USER_MODEL = "users.User"
 
 AUTHENTICATION_BACKENDS = [
@@ -2559,8 +2559,8 @@ next-env.d.ts
 
 
 ### frontend/ailingo/.env ###
-# NEXT_PUBLIC_API_BASE_URL=https://ailingo.onrender.com/api
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+NEXT_PUBLIC_API_BASE_URL=https://bold-ardath-ailingo-8339d7ad.koyeb.app/api
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
 NEXTAUTH_SECRET=secret-key
 
 ### frontend/ailingo/tsconfig.json ###
@@ -3533,40 +3533,10 @@ export default function LoginPage() {
 
 
 ### frontend/ailingo/src/app/analytics/page.tsx ###
-'use client';
-
-import { useAuth } from '../../lib/useAuth';
-import { useEffect, useState } from 'react';
-import { getUserAnalytics } from '../../lib/api';
-import { AnalyticsChart } from '../../components/AnalyticsChart';
-
 export default function Analytics() {
-  const user = useAuth();
-  const [analytics, setAnalytics] = useState(null);
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const data = await getUserAnalytics(user.email);
-        setAnalytics(data);
-      } catch (error) {
-        console.error('Failed to fetch analytics', error);
-      }
-    };
-
-    if (user) {
-      fetchAnalytics();
-    }
-  }, [user]);
-
-  if (!user || !analytics) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Analytics</h1>
-      <AnalyticsChart data={analytics} />
+    <div className="flex items-center justify-center h-screen">
+      <h1 className="text-4xl font-bold">Not implemented yet</h1>
     </div>
   );
 }
@@ -3607,7 +3577,7 @@ export default function Navbar() {
     const handleStorageChange = () => {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
-        fetchUserDetails();
+        getUserDetails();
       } else {
         setUser(null);
       }
@@ -4244,7 +4214,7 @@ export default function Navbar() {
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
-          const userDetails = await getUserDetails(parsedUser.email);
+          const userDetails = await getUserDetails();
           setUser(userDetails);
         } catch (error) {
           console.error("Failed to fetch user details:", error);
